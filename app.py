@@ -1,15 +1,29 @@
 import streamlit as st
 from PIL import Image, ImageFilter, ImageDraw, ImageEnhance
 from streamlit_image_comparison import image_comparison
+import random
 
-# 1. Set up the web page title and layout (Changed to "wide")
-st.set_page_config(page_title="What Blindness Really Looks Like", layout="wide")
+# 1. Set up the web page title and layout
+st.set_page_config(page_title="What Blindness Really Looks Like", layout="centered")
 
 st.title("👁️ What Blindness Really Looks Like")
-st.write("Inspired by the Perkins School for the Blind. Drag the slider on each image below to compare different visual impairments with normal vision.")
+st.write("Inspired by the Perkins School for the Blind. Scroll down to explore how different visual impairments affect sight. Drag the slider on each image to compare it with normal vision.")
+
+uploaded_file = st.file_uploader("Upload your own image to test (or we'll use the default):", type=["jpg", "jpeg", "png"])
 st.divider()
 
-# 2. Define our image processing functions
+# OPTIMIZATION STEP 1: Resize the image before doing any heavy math
+def resize_for_performance(img, max_width=800):
+    """Resizes the image if it is too large, drastically speeding up processing."""
+    if img.width > max_width:
+        ratio = max_width / img.width
+        new_height = int(img.height * ratio)
+        # Resize using a high-quality downsampling filter
+        return img.resize((max_width, new_height), Image.Resampling.LANCZOS)
+    return img
+
+# OPTIMIZATION STEP 2: Add @st.cache_data to memorize processed images
+@st.cache_data
 def apply_glaucoma(img):
     mask = Image.new('L', img.size, 0)
     draw = ImageDraw.Draw(mask)
@@ -23,6 +37,7 @@ def apply_glaucoma(img):
     black_img = Image.new('RGB', img.size, (0, 0, 0))
     return Image.composite(img, black_img, mask)
 
+@st.cache_data
 def apply_macular_degeneration(img):
     img_copy = img.copy()
     mask = Image.new('L', img.size, 0)
@@ -37,14 +52,41 @@ def apply_macular_degeneration(img):
     black_img = Image.new('RGB', img.size, (0, 0, 0))
     return Image.composite(black_img, img_copy, mask)
 
+@st.cache_data
 def apply_achromatopsia(img):
     return img.convert('L').convert('RGB')
 
+@st.cache_data
 def apply_low_vision(img):
     img_blur = img.filter(ImageFilter.GaussianBlur(radius=10))
     enhancer = ImageEnhance.Brightness(img_blur)
     return enhancer.enhance(0.5)
 
+@st.cache_data
+def apply_cataracts(img):
+    img_blur = img.filter(ImageFilter.GaussianBlur(radius=4))
+    yellow_tint = Image.new('RGB', img.size, (255, 240, 200))
+    return Image.blend(img_blur, yellow_tint, alpha=0.2)
+
+@st.cache_data
+def apply_diabetic_retinopathy(img):
+    img_copy = img.copy()
+    mask = Image.new('L', img.size, 0)
+    draw = ImageDraw.Draw(mask)
+    width, height = img.size
+    
+    random.seed(42) 
+    for _ in range(12):
+        x = random.randint(0, width)
+        y = random.randint(0, height)
+        r = random.randint(20, min(width, height) // 8)
+        draw.ellipse((x - r, y - r, x + r, y + r), fill=255)
+        
+    mask = mask.filter(ImageFilter.GaussianBlur(radius=15))
+    black_img = Image.new('RGB', img.size, (0, 0, 0))
+    return Image.composite(black_img, img_copy, mask)
+
+@st.cache_data
 def apply_lower_field_loss(img):
     mask = Image.new('L', img.size, 255)
     draw = ImageDraw.Draw(mask)
@@ -56,72 +98,38 @@ def apply_lower_field_loss(img):
     black_img = Image.new('RGB', img.size, (0, 0, 0))
     return Image.composite(img, black_img, mask)
 
-# 3. Load the original image
-try:
-    original_image = Image.open("sample_image.jpg")
-except FileNotFoundError:
-    st.error("Please place an image named 'sample_image.jpg' in the same folder as this script!")
-    st.stop()
+# 3. Load AND Optimize the image
+if uploaded_file is not None:
+    raw_image = Image.open(uploaded_file).convert("RGB")
+else:
+    try:
+        raw_image = Image.open("sample_image.jpg").convert("RGB")
+    except FileNotFoundError:
+        st.error("Please place an image named 'sample_image.jpg' in the same folder, or upload an image above!")
+        st.stop()
 
-# 4. Create a 5-column layout to fit everything on one screen
-col1, col2, col3, col4, col5 = st.columns(5)
+# Apply our new resizing function here
+original_image = resize_for_performance(raw_image)
+
+# 4. Educational Layout & Render
 
 # --- Example 1: Glaucoma ---
-with col1:
-    st.markdown("**1. Glaucoma**")
-    st.caption("Damages the optic nerve, resulting in 'tunnel vision' and loss of peripheral sight.")
-    image_comparison(
-        img1=original_image,
-        img2=apply_glaucoma(original_image),
-        label1="Normal",
-        label2="Glaucoma",
-        starting_position=50
-    )
+st.subheader("1. Glaucoma")
+st.markdown("""
+* **The Condition:** Glaucoma is a group of eye conditions that damage the optic nerve, which is crucial for good vision. This damage is often caused by an abnormally high pressure in your eye. It typically develops slowly over time, and the first sign is usually the loss of peripheral (side) vision. 
+* **What's in the Image:** The code creates a "tunnel vision" effect. The center of the image remains clear, but the outer edges are heavily darkened and blurred out.
+""")
+image_comparison(original_image, apply_glaucoma(original_image), label1="Normal", label2="Glaucoma", starting_position=50)
+st.divider()
 
 # --- Example 2: Macular Degeneration ---
-with col2:
-    st.markdown("**2. Macular Degen.**")
-    st.caption("Deteriorates the retina's center, creating a dark, blurry blind spot in the middle.")
-    image_comparison(
-        img1=original_image,
-        img2=apply_macular_degeneration(original_image),
-        label1="Normal",
-        label2="Macular",
-        starting_position=50
-    )
+st.subheader("2. Macular Degeneration")
+st.markdown("""
+* **The Condition:** Occurs when the small central portion of the retina (the macula) deteriorates. Because the disease affects the center of the visual field, it makes reading, driving, and recognizing faces very difficult.
+* **What's in the Image:** A dark, blurry "cloud" is applied directly over the center of the image, while peripheral edges remain clear.
+""")
+image_comparison(original_image, apply_macular_degeneration(original_image), label1="Normal", label2="Macular Degen.", starting_position=50)
+st.divider()
 
-# --- Example 3: Achromatopsia ---
-with col3:
-    st.markdown("**3. Achromatopsia**")
-    st.caption("A rare condition causing a partial or total absence of all color vision.")
-    image_comparison(
-        img1=original_image,
-        img2=apply_achromatopsia(original_image),
-        label1="Normal",
-        label2="Achromatopsia",
-        starting_position=50
-    )
-
-# --- Example 4: Low Vision ---
-with col4:
-    st.markdown("**4. Low Vision**")
-    st.caption("Severe loss of sharpness causing a heavily blurred and dimmed view.")
-    image_comparison(
-        img1=original_image,
-        img2=apply_low_vision(original_image),
-        label1="Normal",
-        label2="Low Vision",
-        starting_position=50
-    )
-
-# --- Example 5: Cortical/Cerebral Visual Impairment (CVI) ---
-with col5:
-    st.markdown("**5. Lower Field Loss**")
-    st.caption("A brain-based impairment where the lower half of the visual field is ignored.")
-    image_comparison(
-        img1=original_image,
-        img2=apply_lower_field_loss(original_image),
-        label1="Normal",
-        label2="CVI",
-        starting_position=50
-    )
+# --- Example 3: Cataracts ---
+st
