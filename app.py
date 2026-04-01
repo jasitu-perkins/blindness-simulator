@@ -12,8 +12,8 @@ st.markdown("<p style='text-align: center; font-size: 1.2em;'>Inspired by the Pe
 uploaded_file = st.file_uploader("Upload your own image to test (or we'll use the default):", type=["jpg", "jpeg", "png"])
 st.divider()
 
-# OPTIMIZATION & SIZING: Resize the image to be 50% smaller again (max 200px wide)
-def resize_for_performance(img, max_width=200):
+# OPTIMIZATION & SIZING: Resize the image to be 30% larger than the previous step (max 260px wide)
+def resize_for_performance(img, max_width=260):
     if img.width > max_width:
         ratio = max_width / img.width
         new_height = int(img.height * ratio)
@@ -101,55 +101,6 @@ def apply_diabetic_retinopathy(img):
     black_img = Image.new('RGB', img.size, (0, 0, 0))
     return Image.composite(black_img, img_copy, mask).convert("RGB")
 
-# ==========================================
-# FILTER FUNCTIONS (CVI Profiles)
-# ==========================================
-@st.cache_data
-def apply_cvi_tina(img):
-    img_blur = img.filter(ImageFilter.GaussianBlur(radius=15))
-    offset_img = Image.new("RGB", img.size)
-    offset_img.paste(img_blur, (15, 0)) 
-    return Image.blend(img_blur, offset_img, alpha=0.5).convert("RGB")
-
-@st.cache_data
-def apply_cvi_dagbjort(img):
-    mask = Image.new('L', img.size, 0)
-    draw = ImageDraw.Draw(mask)
-    width, height = img.size
-    radius = min(width, height) // 10 
-    center_x, center_y = width // 2, height // 2
-    
-    draw.ellipse((center_x - radius, center_y - radius, center_x + radius, center_y + radius), fill=255)
-    mask = mask.filter(ImageFilter.GaussianBlur(radius=15))
-    
-    black_img = Image.new('RGB', img.size, (0, 0, 0))
-    return Image.composite(img, black_img, mask).convert("RGB")
-
-@st.cache_data
-def apply_cvi_omer(img):
-    img_blur = img.filter(ImageFilter.GaussianBlur(radius=30))
-    mask = Image.new('L', img.size, 0)
-    draw = ImageDraw.Draw(mask)
-    width, height = img.size
-    radius = min(width, height) // 3
-    center_x, center_y = width // 2, height // 2
-    
-    draw.ellipse((center_x - radius, center_y - radius, center_x + radius, center_y + radius), fill=255)
-    mask = mask.filter(ImageFilter.GaussianBlur(radius=40))
-    
-    return Image.composite(img_blur, img, mask).convert("RGB")
-
-@st.cache_data
-def apply_cvi_krish(img):
-    mask = Image.new('L', img.size, 255)
-    draw = ImageDraw.Draw(mask)
-    width, height = img.size
-    draw.rectangle((0, height // 2, width, height), fill=0)
-    mask = mask.filter(ImageFilter.GaussianBlur(radius=20))
-    
-    black_img = Image.new('RGB', img.size, (0, 0, 0))
-    return Image.composite(img, black_img, mask).convert("RGB")
-
 # 3. Load AND Optimize the image
 if uploaded_file is not None:
     raw_image = Image.open(uploaded_file).convert("RGB")
@@ -166,11 +117,14 @@ original_image = resize_for_performance(raw_image)
 # RENDER GRID: 3x2 Standard Conditions
 # ==========================================
 st.markdown("<h2 style='text-align: center;'>Medical Eye Conditions</h2><br>", unsafe_allow_html=True)
-row1_col1, row1_col2, row1_col3 = st.columns(3)
 
-with row1_col1:
+# ROW 1 - Using spacer columns on the left and right to center the grid and leave white space
+spacer_left_1, col1, col2, col3, spacer_right_1 = st.columns([1, 3, 3, 3, 1])
+
+with col1:
     st.markdown("<h3 style='text-align: center;'>1. Glaucoma</h3>", unsafe_allow_html=True)
-    image_comparison(original_image, apply_glaucoma(original_image), label1="Normal", label2="Glaucoma", width=200)
+    # Replaced hardcoded width with parameter alignment for the new size
+    image_comparison(original_image, apply_glaucoma(original_image), label1="Normal", label2="Glaucoma", width=260)
     st.markdown("""
     <div style='text-align: center; font-size: 1.1em; margin-top: -15px;'>
         <b>The Condition:</b> Damages the optic nerve, often caused by abnormally high eye pressure. It typically develops slowly, with the first sign usually being the loss of peripheral vision.<br><br>
@@ -178,9 +132,9 @@ with row1_col1:
     </div>
     """, unsafe_allow_html=True)
 
-with row1_col2:
+with col2:
     st.markdown("<h3 style='text-align: center;'>2. Macular Degeneration</h3>", unsafe_allow_html=True)
-    image_comparison(original_image, apply_macular_degeneration(original_image), label1="Normal", label2="Macular Degen.", width=200)
+    image_comparison(original_image, apply_macular_degeneration(original_image), label1="Normal", label2="Macular Degen.", width=260)
     st.markdown("""
     <div style='text-align: center; font-size: 1.1em; margin-top: -15px;'>
         <b>The Condition:</b> Deterioration of the central portion of the retina. Because it affects the center of the visual field, reading and recognizing faces becomes very difficult.<br><br>
@@ -188,9 +142,9 @@ with row1_col2:
     </div>
     """, unsafe_allow_html=True)
 
-with row1_col3:
+with col3:
     st.markdown("<h3 style='text-align: center;'>3. Achromatopsia</h3>", unsafe_allow_html=True)
-    image_comparison(original_image, apply_achromatopsia(original_image), label1="Normal", label2="Achromatopsia", width=200)
+    image_comparison(original_image, apply_achromatopsia(original_image), label1="Normal", label2="Achromatopsia", width=260)
     st.markdown("""
     <div style='text-align: center; font-size: 1.1em; margin-top: -15px;'>
         <b>The Condition:</b> A rare, inherited vision disorder where a person has a partial or total absence of color vision, relying entirely on rod cells.<br><br>
@@ -200,11 +154,12 @@ with row1_col3:
 
 st.write("<br><br>", unsafe_allow_html=True) # Spacing between rows
 
-row2_col1, row2_col2, row2_col3 = st.columns(3)
+# ROW 2 - Using identical spacer columns
+spacer_left_2, col4, col5, col6, spacer_right_2 = st.columns([1, 3, 3, 3, 1])
 
-with row2_col1:
+with col4:
     st.markdown("<h3 style='text-align: center;'>4. Cataracts</h3>", unsafe_allow_html=True)
-    image_comparison(original_image, apply_cataracts(original_image), label1="Normal", label2="Cataracts", width=200)
+    image_comparison(original_image, apply_cataracts(original_image), label1="Normal", label2="Cataracts", width=260)
     st.markdown("""
     <div style='text-align: center; font-size: 1.1em; margin-top: -15px;'>
         <b>The Condition:</b> A clouding of the normally clear lens of the eye, comparable to looking through a frosted window. It can also add a yellowish tint.<br><br>
@@ -212,9 +167,9 @@ with row2_col1:
     </div>
     """, unsafe_allow_html=True)
 
-with row2_col2:
+with col5:
     st.markdown("<h3 style='text-align: center;'>5. Diabetic Retinopathy</h3>", unsafe_allow_html=True)
-    image_comparison(original_image, apply_diabetic_retinopathy(original_image), label1="Normal", label2="Diabetic Retin.", width=200)
+    image_comparison(original_image, apply_diabetic_retinopathy(original_image), label1="Normal", label2="Diabetic Retin.", width=260)
     st.markdown("""
     <div style='text-align: center; font-size: 1.1em; margin-top: -15px;'>
         <b>The Condition:</b> A diabetes complication caused by damage to the blood vessels in the retina. It causes dark spots or "floaters" to appear in vision.<br><br>
@@ -222,62 +177,12 @@ with row2_col2:
     </div>
     """, unsafe_allow_html=True)
 
-with row2_col3:
+with col6:
     st.markdown("<h3 style='text-align: center;'>6. Low Vision</h3>", unsafe_allow_html=True)
-    image_comparison(original_image, apply_low_vision(original_image), label1="Normal", label2="Low Vision", width=200)
+    image_comparison(original_image, apply_low_vision(original_image), label1="Normal", label2="Low Vision", width=260)
     st.markdown("""
     <div style='text-align: center; font-size: 1.1em; margin-top: -15px;'>
         <b>The Condition:</b> A broad term for significant visual impairment that cannot be fully corrected, resulting in a severe loss of visual sharpness.<br><br>
         <b>What's in the Image:</b> A heavy blur is applied across the entire image and brightness is reduced, simulating a hazy, unfocused world.
-    </div>
-    """, unsafe_allow_html=True)
-
-st.divider()
-
-# ==========================================
-# RENDER GRID: 1x4 CVI Profiles
-# ==========================================
-st.markdown("<h2 style='text-align: center;'>🧠 Cortical/Cerebral Visual Impairment (CVI)</h2>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; font-size: 1.2em;'>CVI is a neurological impairment where the eyes capture light, but the brain struggles to process the signals. Every individual's experience is unique.</p><br>", unsafe_allow_html=True)
-
-cvi_col1, cvi_col2, cvi_col3, cvi_col4 = st.columns(4)
-
-with cvi_col1:
-    st.markdown("<h4 style='text-align: center;'>Profile: Tina</h4>", unsafe_allow_html=True)
-    image_comparison(original_image, apply_cvi_tina(original_image), label1="Normal", label2="Tina's CVI", width=200)
-    st.markdown("""
-    <div style='text-align: center; font-size: 1.1em; margin-top: -15px;'>
-        <b>The Condition:</b> Tina has 20/100 vision, optic nerve atrophy, and nystagmus (involuntary eye shaking).<br><br>
-        <b>What's in the Image:</b> Heavy blur limits sharpness, while a duplicated offset simulates visual instability.
-    </div>
-    """, unsafe_allow_html=True)
-
-with cvi_col2:
-    st.markdown("<h4 style='text-align: center;'>Profile: Dagbjört</h4>", unsafe_allow_html=True)
-    image_comparison(original_image, apply_cvi_dagbjort(original_image), label1="Normal", label2="Dagbjört's CVI", width=200)
-    st.markdown("""
-    <div style='text-align: center; font-size: 1.1em; margin-top: -15px;'>
-        <b>The Condition:</b> When fatigued, her brain restricts how much visual data it takes in to conserve energy.<br><br>
-        <b>What's in the Image:</b> An extreme "pinhole" effect shrinks her field of view down to the size of a straw.
-    </div>
-    """, unsafe_allow_html=True)
-
-with cvi_col3:
-    st.markdown("<h4 style='text-align: center;'>Profile: Omer</h4>", unsafe_allow_html=True)
-    image_comparison(original_image, apply_cvi_omer(original_image), label1="Normal", label2="Omer's CVI", width=200)
-    st.markdown("""
-    <div style='text-align: center; font-size: 1.1em; margin-top: -15px;'>
-        <b>The Condition:</b> Omer struggles with focal details, meaning he cannot easily process the central subject, especially faces.<br><br>
-        <b>What's in the Image:</b> The focal center is heavily scrambled, forcing reliance on peripheral context.
-    </div>
-    """, unsafe_allow_html=True)
-
-with cvi_col4:
-    st.markdown("<h4 style='text-align: center;'>Profile: Krish</h4>", unsafe_allow_html=True)
-    image_comparison(original_image, apply_cvi_krish(original_image), label1="Normal", label2="Krish's CVI", width=200)
-    st.markdown("""
-    <div style='text-align: center; font-size: 1.1em; margin-top: -15px;'>
-        <b>The Condition:</b> Krish has a specific visual field loss where his brain ignores data from the lower half of his vision.<br><br>
-        <b>What's in the Image:</b> The lower half is completely blacked out, simulating struggles with tripping hazards.
     </div>
     """, unsafe_allow_html=True)
