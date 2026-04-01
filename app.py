@@ -9,8 +9,6 @@ st.set_page_config(page_title="What Blindness Really Looks Like", layout="wide")
 # ==========================================
 # INJECT CUSTOM CSS FOR PERFECT ALIGNMENT
 # ==========================================
-# This is required because third-party components don't always respect 
-# horizontal centering inside Streamlit columns automatically.
 st.markdown("""
 <style>
 /* CSS to center the title, description div and the image comparison container */
@@ -40,15 +38,17 @@ st.markdown("""
 </p>
 """, unsafe_allow_html=True)
 
+st.divider()
+
 # ==========================================
-# ABOUT THE PROJECT SECTION
+# ABOUT THE PROJECT SECTION (Now fully visible!)
 # ==========================================
-with st.expander("ℹ️ About This Project & How It Was Built"):
-    st.markdown("**🎯 Purpose:**")
-    st.write("This application was created to raise awareness and foster empathy. By providing a visual simulation of various medical eye conditions, it helps fully sighted individuals understand the daily visual challenges faced by those with visual impairments.")
-    
-    st.markdown("**🤖 Prompt Used to Generate This App:**")
-    st.code('Create a responsive Streamlit web app in Python using PIL to simulate blindness and eye conditions (Glaucoma, Macular Degeneration, Achromatopsia, Cataracts, Diabetic Retinopathy, Low Vision). Add side-by-side image comparison sliders, ensure images, headers, and descriptions are perfectly centered together, leave appropriate whitespace, use full spelled-out labels, and remove numbering from conditions. Cataract and Diabetic Retinopathy spots should be smaller, blurrier, and translucent (see-through). Ensure Glaucoma is a true pinhole effect.', language='text')
+st.markdown("<h3 style='text-align: center;'>ℹ️ About This Project & How It Was Built</h3>", unsafe_allow_html=True)
+st.markdown("**🎯 Purpose:**")
+st.write("This application was created to raise awareness and foster empathy. By providing a visual simulation of various medical eye conditions, it helps fully sighted individuals understand the daily visual challenges faced by those with visual impairments.")
+
+st.markdown("**🤖 Prompt Used to Generate This App:**")
+st.code('Create a responsive Streamlit web app in Python using PIL to simulate blindness and eye conditions (Glaucoma, Macular Degeneration, Achromatopsia, Cataracts, Diabetic Retinopathy, Low Vision). Add side-by-side image comparison sliders, ensure images, headers, and descriptions are perfectly centered together, leave appropriate whitespace, use full spelled-out labels, and remove numbering from conditions. Cataract and Diabetic Retinopathy spots should be smaller, blurrier, and translucent (see-through). Ensure Glaucoma is a true pinhole effect.', language='text')
 
 st.divider()
 
@@ -82,17 +82,13 @@ def resize_and_crop_square(img, target_size=700):
 
 @st.cache_data
 def apply_glaucoma(img):
-    """Creates a true pinhole 'tunnel vision' effect."""
     mask = Image.new('L', img.size, 0)
     draw = ImageDraw.Draw(mask)
     width, height = img.size
     radius = min(width, height) // 3
     center_x, center_y = width // 2, height // 2
     
-    # Draw clear center
     draw.ellipse((center_x - radius, center_y - radius, center_x + radius, center_y + radius), fill=255)
-    
-    # Soften edges slightly
     mask = mask.filter(ImageFilter.GaussianBlur(radius=20))
     
     black_img = Image.new('RGB', img.size, (0, 0, 0))
@@ -100,7 +96,6 @@ def apply_glaucoma(img):
 
 @st.cache_data
 def apply_macular_degeneration(img):
-    """Creates a dark, solid blurry blind spot in the center."""
     img_copy = img.copy()
     mask = Image.new('L', img.size, 0)
     draw = ImageDraw.Draw(mask)
@@ -108,87 +103,68 @@ def apply_macular_degeneration(img):
     radius = min(width, height) // 4
     center_x, center_y = width // 2, height // 2
     
-    # Draw central blind spot area
     draw.ellipse((center_x - radius, center_y - radius, center_x + radius, center_y + radius), fill=255)
-    # Moderate blur for the spot edges
     mask = mask.filter(ImageFilter.GaussianBlur(radius=20)) 
     
     black_img = Image.new('RGB', img.size, (0, 0, 0))
-    # Composite the black image over the original
     return Image.composite(black_img, img_copy, mask).convert("RGB")
 
 @st.cache_data
 def apply_achromatopsia(img):
-    """Total absence of color vision."""
     return img.convert('L').convert('RGB')
 
 @st.cache_data
 def apply_low_vision(img):
-    """Uniform blur and reduced brightness."""
-    # Retaining moderate blur (4) as requested previously
     img_blur = img.filter(ImageFilter.GaussianBlur(radius=4))
     enhancer = ImageEnhance.Brightness(img_blur)
     return enhancer.enhance(0.5).convert("RGB")
 
 @st.cache_data
 def apply_cataracts(img):
-    """UPDATED: White foggy patches are smaller, much blurrier, and translucent."""
-    base_blur = img.filter(ImageFilter.GaussianBlur(radius=4))
+    """UPDATED: Base image remains sharp, ONLY the white spots are blurry."""
+    base_img = img.copy() # No blur applied to the background!
     
-    # Create mask for white patches
     cloud_mask = Image.new('L', img.size, 0)
     draw = ImageDraw.Draw(cloud_mask)
     width, height = img.size
     
     random.seed(10)
-    # 10 spots, translucent fill (160 out of 255) on 'L' mask
     for _ in range(10): 
         x = random.randint(0, width)
         y = random.randint(0, height)
-        # Reduced initial radius range
         r = random.randint(width // 15, width // 5)
-        # Low fill value = high transparency when compositing white
         draw.ellipse((x - r, y - r, x + r, y + r), fill=160) 
         
-    # High blur for the mask makes the patches very foggy and soft
+    # High blur ONLY on the mask makes the patches very foggy and soft
     cloud_mask = cloud_mask.filter(ImageFilter.GaussianBlur(radius=25))
     white_img = Image.new('RGB', img.size, (255, 255, 255))
     
-    # Composite white over the base image using the foggy mask
-    return Image.composite(white_img, base_blur, cloud_mask).convert("RGB")
+    return Image.composite(white_img, base_img, cloud_mask).convert("RGB")
 
 @st.cache_data
 def apply_diabetic_retinopathy(img):
-    """UPDATED: Dark splotches are smaller, much blurrier, and translucent."""
+    """UPDATED: Dark splotches are now more solid."""
     img_copy = img.copy()
-    
-    # Create mask for dark spots
     mask = Image.new('L', img.size, 0)
     draw = ImageDraw.Draw(mask)
     width, height = img.size
     
     random.seed(42) 
-    # 30 spots, translucent fill (180 out of 255) on 'L' mask
     for _ in range(30): 
         x = random.randint(0, width)
         y = random.randint(0, height)
-        # Slightly reduced spot size
         r = random.randint(15, min(width, height) // 6) 
-        # Moderate fill value = semi-transparent when compositing black
-        draw.ellipse((x - r, y - r, x + r, y + r), fill=180)
+        # Increased fill to 255 for solid dark spots
+        draw.ellipse((x - r, y - r, x + r, y + r), fill=255)
         
-    # High blur for the mask makes the spots blurry splotches
-    mask = mask.filter(ImageFilter.GaussianBlur(radius=20))
+    mask = mask.filter(ImageFilter.GaussianBlur(radius=10))
     black_img = Image.new('RGB', img.size, (0, 0, 0))
-    
-    # Composite black image over original image using the splotchy mask
     return Image.composite(black_img, img_copy, mask).convert("RGB")
 
 # ==========================================
 # MAIN APPLICATION LOGIC
 # ==========================================
 
-# 3. Load AND Optimize the image
 if uploaded_file is not None:
     raw_image = Image.open(uploaded_file).convert("RGB")
 else:
@@ -198,51 +174,51 @@ else:
         st.error("Please place an image named 'sample_image.jpg' in the same folder, or upload an image above!")
         st.stop()
 
-# Apply standard optimization for consistency
-# Increased to 700px target size for wide layout symmetry
 original_image = resize_and_crop_square(raw_image, target_size=700)
 
-# Educational Layout & Render
 st.markdown("<h2 style='text-align: center;'>Medical Eye Conditions</h2><br>", unsafe_allow_html=True)
 
-# ROW 1 - Native columns with large gap for responsive layout
+# ROW 1
 col1, col2, col3 = st.columns(3, gap="large")
 
 with col1:
-    # Wrap entire block in centered HTML div
     st.markdown("<div class='centered-content'>", unsafe_allow_html=True)
     st.markdown("<h3>Glaucoma</h3>", unsafe_allow_html=True)
     image_comparison(original_image, apply_glaucoma(original_image), label1="Normal Vision", label2="Glaucoma", width=700)
+    # Reduced margin-top from 15px to 5px
     st.markdown("""
-    <div style='font-size: 1.1em; margin-top: 15px;'>
+    <div style='font-size: 1.1em; margin-top: 5px;'>
         <b>The Condition:</b> Damages the optic nerve, often caused by abnormally high eye pressure. It typically develops slowly, with the first sign usually being the loss of peripheral vision.<br><br>
         <b>What's in the Image:</b> Creates a "tunnel vision" effect. The center remains clear, but the outer edges are heavily darkened.
     </div>
-    </div> """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
 
 with col2:
     st.markdown("<div class='centered-content'>", unsafe_allow_html=True)
     st.markdown("<h3>Macular Degeneration</h3>", unsafe_allow_html=True)
     image_comparison(original_image, apply_macular_degeneration(original_image), label1="Normal Vision", label2="Macular Degeneration", width=700)
     st.markdown("""
-    <div style='font-size: 1.1em; margin-top: 15px;'>
+    <div style='font-size: 1.1em; margin-top: 5px;'>
         <b>The Condition:</b> Deterioration of the central portion of the retina. Because it affects the center of the visual field, reading and recognizing faces becomes very difficult.<br><br>
         <b>What's in the Image:</b> A dark, solid blurry "cloud" is applied directly over the center of the image, while peripheral edges remain clear.
     </div>
-    </div> """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
 
 with col3:
     st.markdown("<div class='centered-content'>", unsafe_allow_html=True)
     st.markdown("<h3>Achromatopsia</h3>", unsafe_allow_html=True)
     image_comparison(original_image, apply_achromatopsia(original_image), label1="Normal Vision", label2="Achromatopsia", width=700)
     st.markdown("""
-    <div style='font-size: 1.1em; margin-top: 15px;'>
+    <div style='font-size: 1.1em; margin-top: 5px;'>
         <b>The Condition:</b> A rare, inherited vision disorder where a person has a partial or total absence of color vision, relying entirely on rod cells.<br><br>
         <b>What's in the Image:</b> The code strips away all color data and converts the image to grayscale, showing a purely black-and-white scene.
     </div>
-    </div> """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
 
-st.write("<br><br>", unsafe_allow_html=True) # Spacing between rows
+st.write("<br><br>", unsafe_allow_html=True)
 
 # ROW 2
 col4, col5, col6 = st.columns(3, gap="large")
@@ -252,30 +228,33 @@ with col4:
     st.markdown("<h3>Cataracts</h3>", unsafe_allow_html=True)
     image_comparison(original_image, apply_cataracts(original_image), label1="Normal Vision", label2="Cataracts", width=700)
     st.markdown("""
-    <div style='font-size: 1.1em; margin-top: 15px;'>
+    <div style='font-size: 1.1em; margin-top: 5px;'>
         <b>The Condition:</b> A clouding of the normally clear lens of the eye, comparable to looking through a frosted window.<br><br>
-        <b>What's in the Image:</b> The image is blurred, and cloudy white splotches that are small, soft, and translucent obscure the view.
+        <b>What's in the Image:</b> The background remains clear, while cloudy, soft, blurry white splotches obscure the view.
     </div>
-    </div> """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
 
 with col5:
     st.markdown("<div class='centered-content'>", unsafe_allow_html=True)
     st.markdown("<h3>Diabetic Retinopathy</h3>", unsafe_allow_html=True)
     image_comparison(original_image, apply_diabetic_retinopathy(original_image), label1="Normal Vision", label2="Diabetic Retinopathy", width=700)
     st.markdown("""
-    <div style='font-size: 1.1em; margin-top: 15px;'>
+    <div style='font-size: 1.1em; margin-top: 5px;'>
         <b>The Condition:</b> A diabetes complication caused by damage to the blood vessels in the retina. It causes dark spots or "floaters" to appear in vision.<br><br>
-        <b>What's in the Image:</b> The code generates random dark splotches that are smaller, blurry, and translucent across the field of view.
+        <b>What's in the Image:</b> The code generates random, solid dark splotches that obscure patches of the field of view.
     </div>
-    </div> """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
 
 with col6:
     st.markdown("<div class='centered-content'>", unsafe_allow_html=True)
     st.markdown("<h3>Low Vision</h3>", unsafe_allow_html=True)
     image_comparison(original_image, apply_low_vision(original_image), label1="Normal Vision", label2="Low Vision", width=700)
     st.markdown("""
-    <div style='font-size: 1.1em; margin-top: 15px;'>
+    <div style='font-size: 1.1em; margin-top: 5px;'>
         <b>The Condition:</b> A broad term for significant visual impairment that cannot be fully corrected, resulting in a severe loss of visual sharpness.<br><br>
         <b>What's in the Image:</b> A moderate blur is applied across the entire image and brightness is reduced, simulating a hazy, unfocused world.
     </div>
-    </div> """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
