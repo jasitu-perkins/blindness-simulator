@@ -132,4 +132,46 @@ image_comparison(original_image, apply_macular_degeneration(original_image), lab
 st.divider()
 
 # --- Example 3: Cataracts ---
-st
+st.subheader("3. Cataracts")
+st.markdown("""
+* **The Condition:** A cataract is a clouding of the normally clear lens of the eye. For people who have cataracts, seeing through cloudy lenses is a bit like looking through a frosty or fogged-up window. As it progresses, it can also add a brownish or yellowish tint to vision.
+* **What's in the Image:** The entire image is slightly blurred to simulate the cloudy lens, and a warm, yellow-brown tint is blended in to demonstrate the color distortion.
+""")
+image_comparison(original_image, apply_cataracts(original_image), label1="Normal", label2="Cataracts", starting_position=50)
+st.divider()
+
+# --- Example 4: Diabetic Retinopathy ---
+st.subheader("4. Diabetic Retinopathy")
+st.markdown("""
+* **The Condition:** A diabetes complication that affects eyes. It's caused by damage to the blood vessels of the light-sensitive tissue at the back of the eye (retina). It can cause dark spots or "floaters" to appear in the person's vision.
+* **What's in the Image:** The code generates random, blurry, dark splotches across the field of view, simulating the patchy vision loss caused by internal bleeding and damaged tissue.
+""")
+image_comparison(original_image, apply_diabetic_retinopathy(original_image), label1="Normal", label2="Diabetic Retin.", starting_position=50)
+st.divider()
+
+# --- Example 5: Low Vision ---
+st.subheader("5. Low Vision")
+st.markdown("""
+* **The Condition:** A broad term for significant visual impairment that cannot be fully corrected. It often results in a severe loss of visual acuity (sharpness).
+* **What's in the Image:** A heavy, uniform blur is applied across the entire image and brightness is reduced, simulating a hazy, unfocused world.
+""")
+image_comparison(original_image, apply_low_vision(original_image), label1="Normal", label2="Low Vision", starting_position=50)
+st.divider()
+
+
+# =========================================================
+# DEDICATED CVI SECTION
+# =========================================================
+st.header("🧠 Cortical/Cerebral Visual Impairment (CVI)")
+st.markdown("""
+**Understanding CVI:** Unlike the eye conditions listed above, CVI is a **brain-based** visual impairment. The eyes themselves might function perfectly and capture light, but the visual processing centers in the brain cannot properly interpret the signals. 
+
+CVI often manifests uniquely in each person. Common traits include needing movement to see an object, intense preference for a specific color, difficulty processing visual complexity (like a crowded room), or ignoring specific sections of the visual field.
+""")
+
+st.subheader("Example A: Lower Field Loss")
+st.markdown("""
+* **The Condition:** The brain entirely ignores visual data coming from a specific portion of the visual field (commonly the lower half). 
+* **What's in the Image:** The code simulates a complete blackout of the lower field. This demonstrates why a person with this specific type of CVI might frequently trip over objects on the floor or struggle with stairs, even if their eyes are technically healthy. Try uploading a picture of a cluttered floor or a sidewalk to see how this impacts navigation!
+""")
+image_comparison(original_image, apply_lower_field_loss(original_image), label1="Normal", label2="Field Loss", starting_position=50)
