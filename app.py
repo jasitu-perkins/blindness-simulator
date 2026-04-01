@@ -26,8 +26,8 @@ with uploader_center:
 
 st.divider()
 
-# OPTIMIZATION & SIZING: Crop to a perfect square, then resize to 410px (20% larger than 340px)
-def resize_and_crop_square(img, target_size=410):
+# OPTIMIZATION & SIZING: Crop to a perfect square, then resize to 500px (20% larger than 410px)
+def resize_and_crop_square(img, target_size=500):
     # 1. Find the shortest side to make a square
     min_dim = min(img.width, img.height)
     
@@ -56,7 +56,7 @@ def apply_glaucoma(img):
     
     draw.ellipse((center_x - radius, center_y - radius, center_x + radius, center_y + radius), fill=255)
     
-    # Reduced the blur radius from 80 down to 20 so the clear center doesn't get darkened
+    # Reduced the blur radius so the clear center doesn't get darkened
     mask = mask.filter(ImageFilter.GaussianBlur(radius=20))
     
     black_img = Image.new('RGB', img.size, (0, 0, 0))
@@ -138,42 +138,42 @@ else:
         st.stop()
 
 # Apply our new square crop and resize
-original_image = resize_and_crop_square(raw_image, target_size=410)
+original_image = resize_and_crop_square(raw_image, target_size=500)
 
 # ==========================================
 # RENDER GRID: 3x2 Standard Conditions
 # ==========================================
 st.markdown("<h2 style='text-align: center;'>Medical Eye Conditions</h2><br>", unsafe_allow_html=True)
 
-# ROW 1 - Using spacer columns on the left and right to center the grid
-spacer_left_1, col1, col2, col3, spacer_right_1 = st.columns([1, 3, 3, 3, 1])
+# ROW 1 - Native columns with large gap for responsive layout (No spacers needed)
+col1, col2, col3 = st.columns(3, gap="large")
 
 with col1:
-    st.markdown("<h3 style='text-align: center;'>1. Glaucoma</h3>", unsafe_allow_html=True)
-    # Updated width to match new 410px size
-    image_comparison(original_image, apply_glaucoma(original_image), label1="Normal Vision", label2="Glaucoma", width=410)
+    st.markdown("<h3 style='text-align: center;'>Glaucoma</h3>", unsafe_allow_html=True)
+    # Width updated to 500
+    image_comparison(original_image, apply_glaucoma(original_image), label1="Normal Vision", label2="Glaucoma", width=500)
     st.markdown("""
-    <div style='text-align: center; font-size: 1.1em; margin-top: -15px;'>
+    <div style='text-align: center; font-size: 1.1em; margin-top: 15px;'>
         <b>The Condition:</b> Damages the optic nerve, often caused by abnormally high eye pressure. It typically develops slowly, with the first sign usually being the loss of peripheral vision.<br><br>
         <b>What's in the Image:</b> Creates a "tunnel vision" effect. The center remains clear, but the outer edges are heavily darkened.
     </div>
     """, unsafe_allow_html=True)
 
 with col2:
-    st.markdown("<h3 style='text-align: center;'>2. Macular Degeneration</h3>", unsafe_allow_html=True)
-    image_comparison(original_image, apply_macular_degeneration(original_image), label1="Normal Vision", label2="Macular Degeneration", width=410)
+    st.markdown("<h3 style='text-align: center;'>Macular Degeneration</h3>", unsafe_allow_html=True)
+    image_comparison(original_image, apply_macular_degeneration(original_image), label1="Normal Vision", label2="Macular Degeneration", width=500)
     st.markdown("""
-    <div style='text-align: center; font-size: 1.1em; margin-top: -15px;'>
+    <div style='text-align: center; font-size: 1.1em; margin-top: 15px;'>
         <b>The Condition:</b> Deterioration of the central portion of the retina. Because it affects the center of the visual field, reading and recognizing faces becomes very difficult.<br><br>
         <b>What's in the Image:</b> A dark, solid blurry "cloud" is applied directly over the center of the image, while peripheral edges remain clear.
     </div>
     """, unsafe_allow_html=True)
 
 with col3:
-    st.markdown("<h3 style='text-align: center;'>3. Achromatopsia</h3>", unsafe_allow_html=True)
-    image_comparison(original_image, apply_achromatopsia(original_image), label1="Normal Vision", label2="Achromatopsia", width=410)
+    st.markdown("<h3 style='text-align: center;'>Achromatopsia</h3>", unsafe_allow_html=True)
+    image_comparison(original_image, apply_achromatopsia(original_image), label1="Normal Vision", label2="Achromatopsia", width=500)
     st.markdown("""
-    <div style='text-align: center; font-size: 1.1em; margin-top: -15px;'>
+    <div style='text-align: center; font-size: 1.1em; margin-top: 15px;'>
         <b>The Condition:</b> A rare, inherited vision disorder where a person has a partial or total absence of color vision, relying entirely on rod cells.<br><br>
         <b>What's in the Image:</b> The code strips away all color data and converts the image to grayscale, showing a purely black-and-white scene.
     </div>
@@ -181,34 +181,34 @@ with col3:
 
 st.write("<br><br>", unsafe_allow_html=True) # Spacing between rows
 
-# ROW 2 - Using identical spacer columns
-spacer_left_2, col4, col5, col6, spacer_right_2 = st.columns([1, 3, 3, 3, 1])
+# ROW 2 - Native columns with large gap
+col4, col5, col6 = st.columns(3, gap="large")
 
 with col4:
-    st.markdown("<h3 style='text-align: center;'>4. Cataracts</h3>", unsafe_allow_html=True)
-    image_comparison(original_image, apply_cataracts(original_image), label1="Normal Vision", label2="Cataracts", width=410)
+    st.markdown("<h3 style='text-align: center;'>Cataracts</h3>", unsafe_allow_html=True)
+    image_comparison(original_image, apply_cataracts(original_image), label1="Normal Vision", label2="Cataracts", width=500)
     st.markdown("""
-    <div style='text-align: center; font-size: 1.1em; margin-top: -15px;'>
+    <div style='text-align: center; font-size: 1.1em; margin-top: 15px;'>
         <b>The Condition:</b> A clouding of the normally clear lens of the eye, comparable to looking through a frosted window.<br><br>
         <b>What's in the Image:</b> The image is blurred, and cloudy white spots obscure the view to simulate the opaque lens.
     </div>
     """, unsafe_allow_html=True)
 
 with col5:
-    st.markdown("<h3 style='text-align: center;'>5. Diabetic Retinopathy</h3>", unsafe_allow_html=True)
-    image_comparison(original_image, apply_diabetic_retinopathy(original_image), label1="Normal Vision", label2="Diabetic Retinopathy", width=410)
+    st.markdown("<h3 style='text-align: center;'>Diabetic Retinopathy</h3>", unsafe_allow_html=True)
+    image_comparison(original_image, apply_diabetic_retinopathy(original_image), label1="Normal Vision", label2="Diabetic Retinopathy", width=500)
     st.markdown("""
-    <div style='text-align: center; font-size: 1.1em; margin-top: -15px;'>
+    <div style='text-align: center; font-size: 1.1em; margin-top: 15px;'>
         <b>The Condition:</b> A diabetes complication caused by damage to the blood vessels in the retina. It causes dark spots or "floaters" to appear in vision.<br><br>
         <b>What's in the Image:</b> The code generates random, prominent dark splotches across the field of view, simulating patchy vision loss.
     </div>
     """, unsafe_allow_html=True)
 
 with col6:
-    st.markdown("<h3 style='text-align: center;'>6. Low Vision</h3>", unsafe_allow_html=True)
-    image_comparison(original_image, apply_low_vision(original_image), label1="Normal Vision", label2="Low Vision", width=410)
+    st.markdown("<h3 style='text-align: center;'>Low Vision</h3>", unsafe_allow_html=True)
+    image_comparison(original_image, apply_low_vision(original_image), label1="Normal Vision", label2="Low Vision", width=500)
     st.markdown("""
-    <div style='text-align: center; font-size: 1.1em; margin-top: -15px;'>
+    <div style='text-align: center; font-size: 1.1em; margin-top: 15px;'>
         <b>The Condition:</b> A broad term for significant visual impairment that cannot be fully corrected, resulting in a severe loss of visual sharpness.<br><br>
         <b>What's in the Image:</b> A moderate blur is applied across the entire image and brightness is reduced, simulating a hazy, unfocused world.
     </div>
