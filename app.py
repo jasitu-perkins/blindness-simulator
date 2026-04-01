@@ -267,4 +267,18 @@ with cvi_col3:
     st.markdown("<h4 style='text-align: center;'>Profile: Omer</h4>", unsafe_allow_html=True)
     image_comparison(original_image, apply_cvi_omer(original_image), label1="Normal", label2="Omer's CVI")
     st.markdown("""
-    <div style='text-align
+    <div style='text-align: center; font-size: 0.85em; padding-top: 10px;'>
+        <b>The Condition:</b> Omer struggles with focal details, meaning he cannot easily process the central subject, especially faces.<br><br>
+        <b>What's in the Image:</b> The focal center is heavily scrambled, forcing reliance on peripheral context.
+    </div>
+    """, unsafe_allow_html=True)
+
+with cvi_col4:
+    st.markdown("<h4 style='text-align: center;'>Profile: Krish</h4>", unsafe_allow_html=True)
+    image_comparison(original_image, apply_cvi_krish(original_image), label1="Normal", label2="Krish's CVI")
+    st.markdown("""
+    <div style='text-align: center; font-size: 0.85em; padding-top: 10px;'>
+        <b>The Condition:</b> Krish has a specific visual field loss where his brain ignores data from the lower half of his vision.<br><br>
+        <b>What's in the Image:</b> The lower half is completely blacked out, simulating struggles with tripping hazards.
+    </div>
+    """, unsafe_allow_html=True)
