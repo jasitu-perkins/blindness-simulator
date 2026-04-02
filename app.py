@@ -7,7 +7,7 @@ from streamlit_image_comparison import image_comparison
 st.set_page_config(page_title="What Blindness Really Looks Like", layout="wide")
 
 # ==========================================
-# ADVANCED CSS: ALIGNMENT & RESPONSIVE WRAP
+# ADVANCED CSS: ALIGNMENT & LAYOUT LOCK
 # ==========================================
 st.markdown("""
 <style>
@@ -29,7 +29,7 @@ st.markdown("""
     position: -webkit-sticky; /* Safari */
     position: sticky;
     top: 0;
-    z-index: 999999 !important; /* High z-index ensures it stays above images when scrolling */
+    z-index: 1000;
 }
 .nav-bar a {
     text-decoration: none;
@@ -44,22 +44,6 @@ st.markdown("""
 /* Global Centering for Headings */
 h1, h2, h3, h4 {
     text-align: center !important;
-}
-
-/* 2. Responsive Flex-Wrap Layout for the Simulation Grid */
-/* Targets the horizontal blocks after our hidden marker */
-.sim-grid-start ~ [data-testid="stHorizontalBlock"] {
-    flex-wrap: wrap !important;
-    justify-content: center !important;
-    gap: 20px !important; 
-}
-
-/* Forces columns to wrap instead of shrink by setting a strict width */
-.sim-grid-start ~ [data-testid="stHorizontalBlock"] > [data-testid="column"] {
-    min-width: 550px !important;
-    max-width: 600px !important; /* Keeps them from getting too wide */
-    flex: 1 1 550px !important; 
-    padding: 10px 0px !important;
 }
 
 /* Perfect Centering for the Image Comparison Container */
@@ -232,11 +216,8 @@ descriptions = {
 # The strict width: will not shrink or crop
 slider_width = 550
 
-# MAGIC MARKER: This hidden div tells our CSS where to apply the responsive flex-wrap layout
-st.markdown('<div class="sim-grid-start"></div>', unsafe_allow_html=True)
-
 # --- ROW 1 ---
-col1, col2 = st.columns(2, gap="large")
+col1, col2, col3 = st.columns(3, gap="large")
 
 with col1:
     st.markdown("<h3>Glaucoma</h3>", unsafe_allow_html=True)
@@ -248,28 +229,22 @@ with col2:
     image_comparison(img, apply_macular(img), label1="Normal", label2="Macular Degeneration", width=slider_width)
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Macular Degeneration']}</div></div>", unsafe_allow_html=True)
 
-# ADDING WHITE SPACE BETWEEN ROWS
-st.markdown("<br><br><br>", unsafe_allow_html=True)
-
-# --- ROW 2 ---
-col3, col4 = st.columns(2, gap="large")
-
 with col3:
     st.markdown("<h3>Achromatopsia</h3>", unsafe_allow_html=True)
     gray_img = img.convert('L').convert('RGB')
     image_comparison(img, gray_img, label1="Normal", label2="Achromatopsia", width=slider_width)
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Achromatopsia']}</div></div>", unsafe_allow_html=True)
 
+# ADDING THE REQUESTED WHITE SPACE BETWEEN ROWS
+st.markdown("<br><br><br><br>", unsafe_allow_html=True)
+
+# --- ROW 2 ---
+col4, col5, col6 = st.columns(3, gap="large")
+
 with col4:
     st.markdown("<h3>Cataracts</h3>", unsafe_allow_html=True)
     image_comparison(img, apply_cataracts(img), label1="Normal", label2="Cataracts", width=slider_width)
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Cataracts']}</div></div>", unsafe_allow_html=True)
-
-# ADDING WHITE SPACE BETWEEN ROWS
-st.markdown("<br><br><br>", unsafe_allow_html=True)
-
-# --- ROW 3 ---
-col5, col6 = st.columns(2, gap="large")
 
 with col5:
     st.markdown("<h3>Diabetic Retinopathy</h3>", unsafe_allow_html=True)
