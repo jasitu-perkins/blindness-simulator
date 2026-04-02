@@ -7,10 +7,17 @@ from streamlit_image_comparison import image_comparison
 st.set_page_config(page_title="What Blindness Really Looks Like", layout="wide")
 
 # ==========================================
-# ADVANCED CSS: ALIGNMENT & CENTERING
+# ADVANCED CSS: ALIGNMENT & LAYOUT LOCK
 # ==========================================
 st.markdown("""
 <style>
+/* 1. Lock the maximum width of the app */
+/* This prevents elements from drifting apart on large screens, adding whitespace to the sides instead */
+.block-container {
+    max-width: 1750px !important;
+    margin: 0 auto !important;
+}
+
 /* Sticky Navigation Bar */
 .nav-bar {
     display: flex;
@@ -39,14 +46,13 @@ h1, h2, h3, h4 {
     text-align: center !important;
 }
 
-/* 1. Perfect Centering for the Image Comparison Container */
-/* We removed the iframe max-width rule so the slider won't break */
+/* Perfect Centering for the Image Comparison Container */
 [data-testid="stVerticalBlock"] > div:has(div.stImageComparison) {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
     margin-bottom: 0px !important;
-    overflow: visible !important; /* Prevents clipping if the screen gets too small */
+    overflow: visible !important;
 }
 
 /* Clean up vertical spacing around the component */
@@ -55,8 +61,7 @@ h1, h2, h3, h4 {
     margin-bottom: 10px !important;
 }
 
-/* 2. Text Alignment Wrappers */
-/* This forces the text block to center directly under the image */
+/* Text Alignment Wrappers */
 .desc-wrapper {
     display: flex;
     justify-content: center;
@@ -67,7 +72,7 @@ h1, h2, h3, h4 {
     font-size: 1.05em;
     line-height: 1.5;
     margin-top: 10px;
-    text-align: left; /* Keeps text readable left-to-right */
+    text-align: left; 
     width: 100%;
     max-width: 550px; /* Locked to exactly match the slider width */
 }
@@ -208,7 +213,7 @@ descriptions = {
     "Low Vision": "<b>The Condition:</b> A broad term for significant visual impairment that cannot be fully corrected, resulting in a severe loss of visual sharpness.<br><br><b>What's in the Image:</b> A moderate blur is applied across the entire image and brightness is reduced, simulating a hazy, unfocused world."
 }
 
-# The sweet spot width: fits long labels, perfectly aligns with text max-width
+# The strict width: will not shrink or crop
 slider_width = 550
 
 # --- ROW 1 ---
