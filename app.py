@@ -7,29 +7,29 @@ from streamlit_image_comparison import image_comparison
 st.set_page_config(page_title="What Blindness Really Looks Like", layout="wide")
 
 # ==========================================
-# ADVANCED CSS: RESPONSIVE WRAP & STICKY NAV
+# ADVANCED CSS: ALIGNMENT & LAYOUT LOCK
 # ==========================================
 st.markdown("""
 <style>
-/* 1. Lock the maximum width of the app for huge screens */
+/* 1. Lock the maximum width of the app */
+/* This prevents elements from drifting apart on large screens, adding whitespace to the sides instead */
 .block-container {
-    max-width: 1800px !important;
+    max-width: 1750px !important;
     margin: 0 auto !important;
 }
 
-/* 2. True Sticky Navigation Bar */
+/* Sticky Navigation Bar */
 .nav-bar {
     display: flex;
     justify-content: center;
     gap: 30px;
-    background-color: #ffffff; /* Clean white background */
+    background-color: #ffffff;
     padding: 15px;
     border-bottom: 2px solid #f0f2f6;
-    position: -webkit-sticky; 
+    position: -webkit-sticky; /* Safari */
     position: sticky;
-    top: 0px; /* Pins to the top */
-    z-index: 999999 !important; /* Forces it above all Streamlit elements */
-    box-shadow: 0px 4px 6px rgba(0,0,0,0.05); /* Slight shadow to pop over content */
+    top: 0;
+    z-index: 1000;
 }
 .nav-bar a {
     text-decoration: none;
@@ -46,22 +46,6 @@ h1, h2, h3, h4 {
     text-align: center !important;
 }
 
-/* 3. Responsive Flex-Wrap Layout for the Simulation Grid */
-/* Targets the horizontal block containing our 6 columns */
-.sim-grid-start ~ [data-testid="stHorizontalBlock"] {
-    flex-wrap: wrap !important;
-    justify-content: center !important;
-    gap: 40px !important; /* Space between rows when wrapped */
-}
-
-/* Forces columns to wrap instead of shrink by setting a strict width */
-.sim-grid-start ~ [data-testid="stHorizontalBlock"] > [data-testid="column"] {
-    min-width: 550px !important;
-    max-width: 550px !important;
-    flex: 1 1 550px !important; 
-    padding: 10px 0px !important;
-}
-
 /* Perfect Centering for the Image Comparison Container */
 [data-testid="stVerticalBlock"] > div:has(div.stImageComparison) {
     display: flex !important;
@@ -71,6 +55,7 @@ h1, h2, h3, h4 {
     overflow: visible !important;
 }
 
+/* Clean up vertical spacing around the component */
 .stImageComparison {
     margin-top: 10px !important;
     margin-bottom: 10px !important;
@@ -104,7 +89,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Main Title Section
-st.markdown("<br><h1>👁️ What Blindness Really Looks Like</h1>", unsafe_allow_html=True)
+st.markdown("<h1>👁️ What Blindness Really Looks Like</h1>", unsafe_allow_html=True)
 st.markdown("""
 <p style='text-align: center; font-size: 1.2em;'>
     Inspired by <a href='https://www.perkins.org/what-blindness-really-looks-like/' target='_blank'>Perkins School for the Blind</a>.<br>
@@ -218,6 +203,7 @@ else:
         st.warning("Please upload an image or ensure 'sample_image.jpg' is available.")
         st.stop()
 
+# Detailed Descriptions Dictionary
 descriptions = {
     "Glaucoma": "<b>The Condition:</b> Damages the optic nerve, often caused by abnormally high eye pressure. It typically develops slowly, with the first sign usually being the loss of peripheral vision.<br><br><b>What's in the Image:</b> Creates a 'tunnel vision' effect. The center remains clear, but the outer edges are heavily darkened.",
     "Macular Degeneration": "<b>The Condition:</b> Deterioration of the central portion of the retina. Because it affects the center of the visual field, reading and recognizing faces becomes very difficult.<br><br><b>What's in the Image:</b> A dark, solid blurry 'cloud' is applied directly over the center of the image, while peripheral edges remain clear.",
@@ -227,42 +213,45 @@ descriptions = {
     "Low Vision": "<b>The Condition:</b> A broad term for significant visual impairment that cannot be fully corrected, resulting in a severe loss of visual sharpness.<br><br><b>What's in the Image:</b> A moderate blur is applied across the entire image and brightness is reduced, simulating a hazy, unfocused world."
 }
 
-# Locked width: 550px prevents the slider javascript from breaking
+# The strict width: will not shrink or crop
 slider_width = 550
 
-# MAGIC MARKER: This hidden div tells our CSS where to apply the responsive flex-wrap layout
-st.markdown('<div class="sim-grid-start"></div>', unsafe_allow_html=True)
+# --- ROW 1 ---
+col1, col2, col3 = st.columns(3, gap="large")
 
-# Creating 6 columns in a single block allows the CSS to dynamically wrap them onto new rows!
-cols = st.columns(6)
-
-with cols[0]:
+with col1:
     st.markdown("<h3>Glaucoma</h3>", unsafe_allow_html=True)
     image_comparison(img, apply_glaucoma(img), label1="Normal", label2="Glaucoma", width=slider_width)
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Glaucoma']}</div></div>", unsafe_allow_html=True)
 
-with cols[1]:
+with col2:
     st.markdown("<h3>Macular Degeneration</h3>", unsafe_allow_html=True)
     image_comparison(img, apply_macular(img), label1="Normal", label2="Macular Degeneration", width=slider_width)
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Macular Degeneration']}</div></div>", unsafe_allow_html=True)
 
-with cols[2]:
+with col3:
     st.markdown("<h3>Achromatopsia</h3>", unsafe_allow_html=True)
     gray_img = img.convert('L').convert('RGB')
     image_comparison(img, gray_img, label1="Normal", label2="Achromatopsia", width=slider_width)
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Achromatopsia']}</div></div>", unsafe_allow_html=True)
 
-with cols[3]:
+# ADDING THE REQUESTED WHITE SPACE BETWEEN ROWS
+st.markdown("<br><br><br><br>", unsafe_allow_html=True)
+
+# --- ROW 2 ---
+col4, col5, col6 = st.columns(3, gap="large")
+
+with col4:
     st.markdown("<h3>Cataracts</h3>", unsafe_allow_html=True)
     image_comparison(img, apply_cataracts(img), label1="Normal", label2="Cataracts", width=slider_width)
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Cataracts']}</div></div>", unsafe_allow_html=True)
 
-with cols[4]:
+with col5:
     st.markdown("<h3>Diabetic Retinopathy</h3>", unsafe_allow_html=True)
     image_comparison(img, apply_retinopathy(img), label1="Normal", label2="Diabetic Retinopathy", width=slider_width)
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Diabetic Retinopathy']}</div></div>", unsafe_allow_html=True)
 
-with cols[5]:
+with col6:
     st.markdown("<h3>Low Vision</h3>", unsafe_allow_html=True)
     image_comparison(img, apply_low_vision(img), label1="Normal", label2="Low Vision", width=slider_width)
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Low Vision']}</div></div>", unsafe_allow_html=True)
