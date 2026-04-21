@@ -74,15 +74,15 @@ h1, h2, h3, h4 {
 .logo-light {
     display: block;
     margin: 0 auto 15px auto;
-    max-width: 15.625em; /* Exactly 250px on standard screens */
-    width: 100%;
+    width: 250px !important; /* Forces exact pixel width for SVG */
+    max-width: 100%; /* Ensures responsiveness on very small screens */
     height: auto;
 }
 .logo-dark {
     display: none; 
     margin: 0 auto 15px auto;
-    max-width: 15.625em; /* Exactly 250px on standard screens */
-    width: 100%;
+    width: 250px !important; /* Forces exact pixel width for SVG */
+    max-width: 100%; /* Ensures responsiveness on very small screens */
     height: auto;
 }
 
@@ -147,9 +147,9 @@ if logo_light_base64 and logo_dark_base64:
     logo_html = f"""<img src='data:image/svg+xml;base64,{logo_light_base64}' alt='Perkins Logo' class='logo-light'>
 <img src='data:image/svg+xml;base64,{logo_dark_base64}' alt='Perkins Logo' class='logo-dark'>"""
 elif logo_light_base64:
-    logo_html = f"<img src='data:image/svg+xml;base64,{logo_light_base64}' alt='Perkins Logo' style='display: block; margin: 0 auto 15px auto; max-width: 15.625em; width: 100%; height: auto;'>"
+    logo_html = f"<img src='data:image/svg+xml;base64,{logo_light_base64}' alt='Perkins Logo' style='display: block; margin: 0 auto 15px auto; width: 250px; max-width: 100%; height: auto;'>"
 elif logo_dark_base64:
-    logo_html = f"<img src='data:image/svg+xml;base64,{logo_dark_base64}' alt='Perkins Logo' style='display: block; margin: 0 auto 15px auto; max-width: 15.625em; width: 100%; height: auto;'>"
+    logo_html = f"<img src='data:image/svg+xml;base64,{logo_dark_base64}' alt='Perkins Logo' style='display: block; margin: 0 auto 15px auto; width: 250px; max-width: 100%; height: auto;'>"
 else:
     logo_html = "<p style='color:red; font-weight:bold; text-align:center;'>⚠️ Could not find logo files. Please ensure they are uploaded.</p>"
 
@@ -406,47 +406,4 @@ dynamic_container_height = int(350 * aspect_ratio)
 # Expanded condition descriptions
 descriptions = {
     "Glaucoma": "<b>The Condition:</b> Damage to the optic nerve, often linked to high eye pressure. It slowly steals peripheral (side) vision over time.<br><br><b>What's in the Image:</b> This creates a 'tunnel vision' effect, where the outer edges become dark and the world shrinks to a small central circle of sight.",
-    "Macular Degeneration": "<b>The Condition:</b> Deterioration of the central portion of the retina, making reading, driving, and recognizing faces highly difficult.<br><br><b>What's in the Image:</b> A dark, blurred or empty spot is placed right in the center of the vision, while peripheral vision remains intact.",
-    "Achromatopsia": "<b>The Condition:</b> A rare, inherited vision disorder where a person has a partial or total absence of color vision, sometimes accompanied by light sensitivity.<br><br><b>What's in the Image:</b> All color data is stripped away, converting the entire visual field to grayscale.",
-    "Cataracts": "<b>The Condition:</b> Clouding of the eye's natural lens, resulting in a loss of contrast, faded colors, and severe glare sensitivity.<br><br><b>What's in the Image:</b> The view feels like looking through a persistently foggy, dusty, or frosted window with overall blurriness.",
-    "Diabetic Retinopathy": "<b>The Condition:</b> Damage to the blood vessels in the retina due to diabetes, often causing poor night vision and fluctuating blurriness.<br><br><b>What's in the Image:</b> Patchy, 'Swiss-cheese' vision with floating dark spots (scotomas) obscuring random parts of the field.",
-    "Low Vision": "<b>The Condition:</b> A broad term for significant visual impairment that cannot be fully corrected with glasses, contacts, or surgery.<br><br><b>What's in the Image:</b> A moderate overall blur is applied and the brightness is reduced to simulate decreased visual acuity."
-}
-
-# --- ROW 1 ---
-col1, col2, col3 = st.columns(3, gap="large")
-
-with col1:
-    st.markdown("<h3>Glaucoma</h3>", unsafe_allow_html=True)
-    custom_overlay_slider(img, apply_glaucoma(img), "Glaucoma", height=dynamic_container_height)
-    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Glaucoma']}</div></div>", unsafe_allow_html=True)
-
-with col2:
-    st.markdown("<h3>Macular Degeneration</h3>", unsafe_allow_html=True)
-    custom_overlay_slider(img, apply_macular(img), "Macular", height=dynamic_container_height)
-    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Macular Degeneration']}</div></div>", unsafe_allow_html=True)
-
-with col3:
-    st.markdown("<h3>Achromatopsia</h3>", unsafe_allow_html=True)
-    gray_img = img.convert('L').convert('RGB')
-    custom_overlay_slider(img, gray_img, "Achromatopsia", height=dynamic_container_height)
-    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Achromatopsia']}</div></div>", unsafe_allow_html=True)
-
-
-# --- ROW 2 ---
-col4, col5, col6 = st.columns(3, gap="large")
-
-with col4:
-    st.markdown("<h3>Cataracts</h3>", unsafe_allow_html=True)
-    custom_overlay_slider(img, apply_cataracts(img), "Cataracts", height=dynamic_container_height)
-    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Cataracts']}</div></div>", unsafe_allow_html=True)
-
-with col5:
-    st.markdown("<h3>Diabetic Retinopathy</h3>", unsafe_allow_html=True)
-    custom_overlay_slider(img, apply_retinopathy(img), "Retinopathy", height=dynamic_container_height)
-    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Diabetic Retinopathy']}</div></div>", unsafe_allow_html=True)
-
-with col6:
-    st.markdown("<h3>Low Vision</h3>", unsafe_allow_html=True)
-    custom_overlay_slider(img, apply_low_vision(img), "Low Vision", height=dynamic_container_height)
-    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Low Vision']}</div></div>", unsafe_allow_html=True)
+    "Macular Degeneration": "<b>The Condition:</b> Deterioration of the central portion of the retina, making reading, driving, and recognizing faces highly difficult.<br><br><b>What's in the Image:</b> A dark, blurred or empty spot is placed right in the center of the vision, while peripheral
