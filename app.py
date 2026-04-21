@@ -6,7 +6,7 @@ import random
 st.set_page_config(page_title="What Blindness Really Looks Like", layout="wide")
 
 # ==========================================
-# ADVANCED CSS: MOBILE OPTIMIZATION & LAYOUT
+# ADVANCED CSS: MOBILE OPTIMIZATION
 # ==========================================
 st.markdown("""
 <style>
@@ -46,11 +46,8 @@ st.markdown("""
     font-weight: bold;
     font-size: 1.1em;
 }
-.nav-bar a:hover {
-    color: #ff4b4b;
-}
 
-/* Global Centering for Headings & Tighter Bottom Spacing */
+/* Global Centering for Headings */
 h1, h2, h3, h4 {
     text-align: center !important;
     margin-bottom: 0.2rem !important; 
@@ -61,7 +58,7 @@ h1, h2, h3, h4 {
     display: flex;
     justify-content: center;
     width: 100%;
-    margin-top: 10px; 
+    margin-top: 5px; 
     margin-bottom: 2rem;
 }
 
@@ -72,11 +69,10 @@ h1, h2, h3, h4 {
     width: 100%;
 }
 
-/* Center the toggles */
-.stToggle {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 5px;
+/* Make sliders tighter to the image */
+.stSlider {
+    padding-bottom: 0px !important;
+    padding-top: 10px !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -168,11 +164,49 @@ def apply_low_vision(img):
     img = img.filter(ImageFilter.GaussianBlur(radius=5))
     return ImageEnhance.Brightness(img).enhance(0.6)
 
+
+# ==========================================
+# CUSTOM NATIVE SLIDER FUNCTION
+# ==========================================
+def native_image_slider(img_normal, img_simulated, condition_name, key):
+    # Ensure images are matched in size
+    if img_normal.size != img_simulated.size:
+        img_simulated = img_simulated.resize(img_normal.size)
+        
+    width, height = img_normal.size
+    
+    # Render Streamlit slider
+    st.markdown(f"<p style='text-align:center; font-size: 0.9em; margin-bottom: -10px;'><b>Left:</b> Normal &nbsp;|&nbsp; <b>Right:</b> {condition_name}</p>", unsafe_allow_html=True)
+    split_pos = st.slider("Compare", 0, 100, 50, key=f"slider_{key}", label_visibility="collapsed")
+    
+    # Calculate crop dimension
+    split_x = int(width * (split_pos / 100))
+    
+    # Base image is the simulated one. We paste the normal one over the left side.
+    composite = img_simulated.copy()
+    if split_x > 0:
+        crop_box = (0, 0, split_x, height)
+        cropped_normal = img_normal.crop(crop_box)
+        composite.paste(cropped_normal, (0,0))
+        
+    # Draw a bold divider line and handle so it looks like an interactive component
+    draw = ImageDraw.Draw(composite)
+    line_width = max(3, width // 150)
+    draw.line([(split_x, 0), (split_x, height)], fill="white", width=line_width)
+    
+    handle_r = max(8, width // 60)
+    draw.ellipse([(split_x - handle_r, (height // 2) - handle_r), 
+                  (split_x + handle_r, (height // 2) + handle_r)], 
+                  fill="white", outline="gray")
+    
+    # Display natively, preserving true vertical height!
+    st.image(composite, use_container_width=True)
+
 # ==========================================
 # SIMULATION GRID
 # ==========================================
 st.header("Medical Eye Conditions")
-st.markdown("<p style='text-align: center;'>Tap the toggle switches to see the difference between normal and impaired vision.</p><br>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'>Drag the sliders below to see the difference.</p><br>", unsafe_allow_html=True)
 
 if uploaded_file:
     if uploaded_file.size > 52428800:
@@ -205,21 +239,18 @@ col1, col2, col3 = st.columns(3, gap="large")
 
 with col1:
     st.markdown("<h3>Glaucoma</h3>", unsafe_allow_html=True)
-    glaucoma_on = st.toggle("Simulate Glaucoma", key="t1")
-    st.image(apply_glaucoma(img) if glaucoma_on else img, use_container_width=True)
+    native_image_slider(img, apply_glaucoma(img), "Glaucoma", "glauc")
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Glaucoma']}</div></div>", unsafe_allow_html=True)
 
 with col2:
     st.markdown("<h3>Macular Degeneration</h3>", unsafe_allow_html=True)
-    macular_on = st.toggle("Simulate Macular Degeneration", key="t2")
-    st.image(apply_macular(img) if macular_on else img, use_container_width=True)
+    native_image_slider(img, apply_macular(img), "Macular", "mac")
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Macular Degeneration']}</div></div>", unsafe_allow_html=True)
 
 with col3:
     st.markdown("<h3>Achromatopsia</h3>", unsafe_allow_html=True)
-    achrom_on = st.toggle("Simulate Achromatopsia", key="t3")
     gray_img = img.convert('L').convert('RGB')
-    st.image(gray_img if achrom_on else img, use_container_width=True)
+    native_image_slider(img, gray_img, "Achromatopsia", "achro")
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Achromatopsia']}</div></div>", unsafe_allow_html=True)
 
 
@@ -228,18 +259,15 @@ col4, col5, col6 = st.columns(3, gap="large")
 
 with col4:
     st.markdown("<h3>Cataracts</h3>", unsafe_allow_html=True)
-    cataracts_on = st.toggle("Simulate Cataracts", key="t4")
-    st.image(apply_cataracts(img) if cataracts_on else img, use_container_width=True)
+    native_image_slider(img, apply_cataracts(img), "Cataracts", "cat")
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Cataracts']}</div></div>", unsafe_allow_html=True)
 
 with col5:
     st.markdown("<h3>Diabetic Retinopathy</h3>", unsafe_allow_html=True)
-    retino_on = st.toggle("Simulate Diabetic Retinopathy", key="t5")
-    st.image(apply_retinopathy(img) if retino_on else img, use_container_width=True)
+    native_image_slider(img, apply_retinopathy(img), "Retinopathy", "ret")
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Diabetic Retinopathy']}</div></div>", unsafe_allow_html=True)
 
 with col6:
     st.markdown("<h3>Low Vision</h3>", unsafe_allow_html=True)
-    low_on = st.toggle("Simulate Low Vision", key="t6")
-    st.image(apply_low_vision(img) if low_on else img, use_container_width=True)
+    native_image_slider(img, apply_low_vision(img), "Low Vision", "low")
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Low Vision']}</div></div>", unsafe_allow_html=True)
