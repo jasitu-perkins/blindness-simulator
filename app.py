@@ -9,22 +9,30 @@ from io import BytesIO
 st.set_page_config(page_title="What Blindness Really Looks Like", layout="wide")
 
 # ==========================================
-# ADVANCED CSS: MOBILE OPTIMIZATION
+# ADVANCED CSS: MOBILE OPTIMIZATION & SPACING
 # ==========================================
 st.markdown("""
 <style>
-/* Responsive main container */
+/* Smooth scrolling and offset for the sticky nav bar */
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px; 
+}
+
+/* Responsive main container with added top/bottom breathing room */
 .block-container {
     max-width: 1400px !important;
     margin: 0 auto !important;
-    padding-top: 1rem !important;
-    padding-bottom: 1rem !important;
+    padding-top: 3rem !important;
+    padding-bottom: 5rem !important;
 }
 
+/* MOBILE OPTIMIZATION: Restored some side padding */
 @media (max-width: 768px) {
     .block-container {
-        padding-left: 0.5rem !important;
-        padding-right: 0.5rem !important;
+        padding-left: 1.2rem !important;
+        padding-right: 1.2rem !important;
+        padding-top: 2rem !important;
     }
 }
 
@@ -35,18 +43,22 @@ st.markdown("""
     flex-wrap: wrap; 
     gap: 20px;
     background-color: #ffffff;
-    padding: 10px;
+    padding: 15px 10px;
     border-bottom: 2px solid #f0f2f6;
     position: -webkit-sticky; 
     position: sticky;
     top: 0;
     z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 .nav-bar a {
     text-decoration: none;
     color: #31333F;
     font-weight: bold;
     font-size: 1.1em;
+}
+.nav-bar a:hover {
+    color: #ff4b4b;
 }
 
 h1, h2, h3, h4 {
@@ -102,7 +114,7 @@ with uploader_center:
 st.divider()
 
 # ==========================================
-# EFFECT FUNCTIONS
+# EFFECT FUNCTIONS (Cached for speed)
 # ==========================================
 @st.cache_data
 def apply_glaucoma(img):
@@ -156,18 +168,16 @@ def apply_low_vision(img):
     return ImageEnhance.Brightness(img).enhance(0.6)
 
 # ==========================================
-# CUSTOM OVERLAY SLIDER (JUXTAPOSE CLONE)
+# CUSTOM OVERLAY SLIDER (Dynamic Height)
 # ==========================================
 def img_to_base64(img):
     """Converts a PIL Image to a base64 string for HTML embedding."""
     buffered = BytesIO()
-    # Save as JPEG for compression speed
-    img.save(buffered, format="JPEG", quality=85)
+    img.save(buffered, format="JPEG", quality=80) # Optimized quality for faster loading
     return base64.b64encode(buffered.getvalue()).decode()
 
-def custom_overlay_slider(img_normal, img_simulated, condition_name, height=400):
-    """Generates a custom HTML/CSS slider overlay that acts like JuxtaposeJS."""
-    
+def custom_overlay_slider(img_normal, img_simulated, condition_name, height):
+    """Generates a custom HTML/CSS slider overlay mapped to exact pixel height."""
     img_normal_b64 = img_to_base64(img_normal)
     img_simulated_b64 = img_to_base64(img_simulated)
     
@@ -181,8 +191,8 @@ def custom_overlay_slider(img_normal, img_simulated, condition_name, height=400)
         .slider-container {{
             position: relative;
             width: 100%;
-            height: {height}px;
-            background-color: #f0f2f6;
+            height: {height}px; /* Perfectly bounds the image */
+            background-color: transparent;
             border-radius: 8px;
             overflow: hidden;
         }}
@@ -192,10 +202,9 @@ def custom_overlay_slider(img_normal, img_simulated, condition_name, height=400)
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Prevents mobile shrinking/cropping */
+            object-fit: cover; /* Ensures filling of the precise container */
             pointer-events: none;
         }}
-        /* The clip-path is what dynamically hides the right side of the top image */
         #img-normal {{
             clip-path: inset(0 50% 0 0); 
             z-index: 2;
@@ -203,7 +212,6 @@ def custom_overlay_slider(img_normal, img_simulated, condition_name, height=400)
         #img-simulated {{
             z-index: 1;
         }}
-        /* The visual white line and circle handle */
         .handle-line {{
             position: absolute;
             left: 50%;
@@ -238,7 +246,6 @@ def custom_overlay_slider(img_normal, img_simulated, condition_name, height=400)
         .handle-circle::before {{ border-right: 8px solid #555; margin-right: 3px; }}
         .handle-circle::after {{ border-left: 8px solid #555; margin-left: 3px; }}
         
-        /* The invisible HTML slider that takes user input */
         .invisible-slider {{
             position: absolute;
             top: 0;
@@ -252,21 +259,21 @@ def custom_overlay_slider(img_normal, img_simulated, condition_name, height=400)
         }}
         .labels {{
             position: absolute;
-            top: 15px;
+            top: 10px;
             width: 100%;
             display: flex;
             justify-content: space-between;
-            padding: 0 20px;
+            padding: 0 15px;
             box-sizing: border-box;
             z-index: 3;
             pointer-events: none;
         }}
         .label-tag {{
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.7);
             color: white;
-            padding: 4px 10px;
+            padding: 4px 8px;
             border-radius: 4px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
             letter-spacing: 0.5px;
         }}
@@ -291,7 +298,6 @@ def custom_overlay_slider(img_normal, img_simulated, condition_name, height=400)
 
         <script>
             function updateSlider(val) {{
-                // As the slider moves, adjust the clip-path and handle position
                 document.getElementById('img-normal').style.clipPath = `inset(0 ${{100 - val}}% 0 0)`;
                 document.getElementById('handle').style.left = val + '%';
             }}
@@ -299,7 +305,7 @@ def custom_overlay_slider(img_normal, img_simulated, condition_name, height=400)
     </body>
     </html>
     """
-    # Render the custom HTML block
+    # HTML component height is now dynamic based on our calculation
     components.html(html_code, height=height)
 
 # ==========================================
@@ -321,8 +327,13 @@ else:
         st.warning("Please upload an image or ensure 'sample_image.jpg' is available.")
         st.stop()
 
-# Downsize to prevent base64 strings from becoming too large for the browser
-img.thumbnail((800, 800), Image.Resampling.LANCZOS)
+# Speed Optimization: Smaller max dimension for faster encoding and rendering
+img.thumbnail((600, 600), Image.Resampling.LANCZOS)
+
+# Determine the dynamic height for the iframes based on aspect ratio
+# We assume an average column width of ~350px as a baseline rendering size
+aspect_ratio = img.height / img.width
+dynamic_container_height = int(350 * aspect_ratio)
 
 descriptions = {
     "Glaucoma": "<b>The Condition:</b> Damages the optic nerve, often caused by abnormally high eye pressure.<br><br><b>What's in the Image:</b> Creates a 'tunnel vision' effect. The center remains clear, but the outer edges are heavily darkened.",
@@ -338,18 +349,18 @@ col1, col2, col3 = st.columns(3, gap="large")
 
 with col1:
     st.markdown("<h3>Glaucoma</h3>", unsafe_allow_html=True)
-    custom_overlay_slider(img, apply_glaucoma(img), "Glaucoma", height=350)
+    custom_overlay_slider(img, apply_glaucoma(img), "Glaucoma", height=dynamic_container_height)
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Glaucoma']}</div></div>", unsafe_allow_html=True)
 
 with col2:
     st.markdown("<h3>Macular Degeneration</h3>", unsafe_allow_html=True)
-    custom_overlay_slider(img, apply_macular(img), "Macular", height=350)
+    custom_overlay_slider(img, apply_macular(img), "Macular", height=dynamic_container_height)
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Macular Degeneration']}</div></div>", unsafe_allow_html=True)
 
 with col3:
     st.markdown("<h3>Achromatopsia</h3>", unsafe_allow_html=True)
     gray_img = img.convert('L').convert('RGB')
-    custom_overlay_slider(img, gray_img, "Achromatopsia", height=350)
+    custom_overlay_slider(img, gray_img, "Achromatopsia", height=dynamic_container_height)
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Achromatopsia']}</div></div>", unsafe_allow_html=True)
 
 
@@ -358,15 +369,15 @@ col4, col5, col6 = st.columns(3, gap="large")
 
 with col4:
     st.markdown("<h3>Cataracts</h3>", unsafe_allow_html=True)
-    custom_overlay_slider(img, apply_cataracts(img), "Cataracts", height=350)
+    custom_overlay_slider(img, apply_cataracts(img), "Cataracts", height=dynamic_container_height)
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Cataracts']}</div></div>", unsafe_allow_html=True)
 
 with col5:
     st.markdown("<h3>Diabetic Retinopathy</h3>", unsafe_allow_html=True)
-    custom_overlay_slider(img, apply_retinopathy(img), "Retinopathy", height=350)
+    custom_overlay_slider(img, apply_retinopathy(img), "Retinopathy", height=dynamic_container_height)
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Diabetic Retinopathy']}</div></div>", unsafe_allow_html=True)
 
 with col6:
     st.markdown("<h3>Low Vision</h3>", unsafe_allow_html=True)
-    custom_overlay_slider(img, apply_low_vision(img), "Low Vision", height=350)
+    custom_overlay_slider(img, apply_low_vision(img), "Low Vision", height=dynamic_container_height)
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Low Vision']}</div></div>", unsafe_allow_html=True)
