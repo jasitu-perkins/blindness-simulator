@@ -37,7 +37,7 @@ html {{
     }}
 }}
 
-/* Sticky Navigation Bar - PERKINS BRANDING (NEW COLOR) */
+/* Sticky Navigation Bar - PERKINS BRANDING */
 .nav-bar {{
     display: flex;
     justify-content: center;
@@ -64,11 +64,23 @@ html {{
     color: #00A3E0;
 }}
 
-/* Brand Colors for Typography */
+/* LIGHT MODE: Default Headers */
 h1, h2, h3, h4 {{
     text-align: center !important;
     margin-bottom: 0.2rem !important; 
-    color: #1d4f91 !important; 
+    color: #1d4f91 !important; /* Perkins Brand Navy */
+}}
+
+/* DARK MODE OVERRIDES */
+@media (prefers-color-scheme: dark) {{
+    h1, h2, h3, h4 {{
+        color: #00A3E0 !important; /* Perkins Light Blue pops on dark backgrounds */
+    }}
+}}
+
+/* Hide Streamlit's default file uploader size text */
+.stFileUploader small {{
+    display: none !important;
 }}
 
 .desc-wrapper {{
@@ -88,11 +100,11 @@ h1, h2, h3, h4 {{
 </style>
 """, unsafe_allow_html=True)
 
-# Navigation Bar
+# Navigation Bar (Updated link text)
 st.markdown("""
 <div class='nav-bar'>
     <a href='#try-it-with-your-own-photo'>Uploader</a>
-    <a href='#medical-eye-conditions'>Simulations</a>
+    <a href='#medical-eye-conditions'>Eye Conditions</a>
 </div>
 """, unsafe_allow_html=True)
 
@@ -113,19 +125,21 @@ logo_filename = "Perkins_Trademark_Color.svg"
 logo_base64 = get_svg_base64(logo_filename)
 
 if logo_base64:
-    logo_html = f"<img src='data:image/svg+xml;base64,{logo_base64}' alt='Perkins Logo' style='max-width: 280px; margin-bottom: 15px;'>"
+    # Added display: block and margin: 0 auto to force perfect centering
+    logo_html = f"<img src='data:image/svg+xml;base64,{logo_base64}' alt='Perkins Logo' style='display: block; margin: 0 auto 15px auto; max-width: 280px;'>"
 else:
-    logo_html = f"<p style='color:red; font-weight:bold;'>⚠️ Could not find logo file: {logo_filename}. Please ensure it is in the same folder as this script.</p>"
+    logo_html = f"<p style='color:red; font-weight:bold; text-align:center;'>⚠️ Could not find logo file: {logo_filename}. Please ensure it is in the same folder as this script.</p>"
 
+# Removed hardcoded colors in the paragraph so it adapts to dark mode automatically
 st.markdown(f"""
 <div style='text-align: center; padding-top: 30px; padding-bottom: 10px;'>
     <a href='https://www.perkins.org/' target='_blank'>
         {logo_html}
     </a>
     <h1 style='font-size: 2.8em; margin-bottom: 10px;'>What Blindness Really Looks Like</h1>
-    <p style='font-size: 1.15em; color: #444; max-width: 800px; margin: 0 auto; line-height: 1.6;'>
+    <p style='font-size: 1.15em; max-width: 800px; margin: 0 auto; line-height: 1.6;'>
         An interactive vision simulator inspired by the advocacy and resources of <a href='https://www.perkins.org/what-blindness-really-looks-like/' target='_blank' style='color: #00A3E0; font-weight: bold; text-decoration: none;'>Perkins School for the Blind</a>.<br>
-        <span style='font-size: 0.85em; color: #777;'>📸 Photo Credit: <a href='https://www.pexels.com/@ganajp/' target='_blank' style='color: #00A3E0; text-decoration: none;'>Petr Ganaj</a></span>
+        <span style='font-size: 0.85em; opacity: 0.8;'>📸 Photo Credit: <a href='https://www.pexels.com/@ganajp/' target='_blank' style='color: #00A3E0; text-decoration: none;'>Petr Ganaj</a></span>
     </p>
 </div>
 """, unsafe_allow_html=True)
@@ -139,8 +153,9 @@ st.header("📸 Try It With Your Own Photo!")
 _, uploader_center, _ = st.columns([1, 2, 1])
 
 with uploader_center:
-    st.markdown("<p style='text-align: center;'>Upload a photo to see the simulations applied to your own environment.</p>", unsafe_allow_html=True)
-    uploaded_file = st.file_uploader("Upload an image (Max 10MB)", type=["jpg", "jpeg", "png", "webp", "bmp", "tiff", "gif"], label_visibility="collapsed")
+    # Custom instructions with explicit max size
+    st.markdown("<p style='text-align: center;'>Upload a photo to see the simulations applied to your own environment. <br><b>(Max 10MB)</b></p>", unsafe_allow_html=True)
+    uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png", "webp", "bmp", "tiff", "gif"], label_visibility="collapsed")
 
 st.divider()
 
