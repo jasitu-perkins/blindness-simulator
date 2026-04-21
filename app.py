@@ -197,4 +197,49 @@ descriptions = {
     "Achromatopsia": "<b>The Condition:</b> A rare, inherited vision disorder where a person has a partial or total absence of color vision, relying entirely on rod cells.<br><br><b>What's in the Image:</b> The code strips away all color data and converts the image to grayscale, showing a purely black-and-white scene.",
     "Cataracts": "<b>The Condition:</b> A clouding of the normally clear lens of the eye, comparable to looking through a frosted window.<br><br><b>What's in the Image:</b> The background remains clear, while cloudy, soft, blurry white splotches obscure the view.",
     "Diabetic Retinopathy": "<b>The Condition:</b> A diabetes complication caused by damage to the blood vessels in the retina. It causes dark spots or 'floaters' to appear in vision.<br><br><b>What's in the Image:</b> The code generates random, solid dark splotches that obscure patches of the field of view.",
-    "Low Vision": "<b>The Condition:</b> A broad term for significant visual impairment that cannot be fully corrected
+    "Low Vision": "<b>The Condition:</b> A broad term for significant visual impairment that cannot be fully corrected, resulting in a severe loss of visual sharpness.<br><br><b>What's in the Image:</b> A moderate blur is applied across the entire image and brightness is reduced, simulating a hazy, unfocused world."
+}
+
+# --- ROW 1 ---
+col1, col2, col3 = st.columns(3, gap="large")
+
+with col1:
+    st.markdown("<h3>Glaucoma</h3>", unsafe_allow_html=True)
+    glaucoma_on = st.toggle("Simulate Glaucoma", key="t1")
+    st.image(apply_glaucoma(img) if glaucoma_on else img, use_container_width=True)
+    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Glaucoma']}</div></div>", unsafe_allow_html=True)
+
+with col2:
+    st.markdown("<h3>Macular Degeneration</h3>", unsafe_allow_html=True)
+    macular_on = st.toggle("Simulate Macular Degeneration", key="t2")
+    st.image(apply_macular(img) if macular_on else img, use_container_width=True)
+    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Macular Degeneration']}</div></div>", unsafe_allow_html=True)
+
+with col3:
+    st.markdown("<h3>Achromatopsia</h3>", unsafe_allow_html=True)
+    achrom_on = st.toggle("Simulate Achromatopsia", key="t3")
+    gray_img = img.convert('L').convert('RGB')
+    st.image(gray_img if achrom_on else img, use_container_width=True)
+    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Achromatopsia']}</div></div>", unsafe_allow_html=True)
+
+
+# --- ROW 2 ---
+col4, col5, col6 = st.columns(3, gap="large")
+
+with col4:
+    st.markdown("<h3>Cataracts</h3>", unsafe_allow_html=True)
+    cataracts_on = st.toggle("Simulate Cataracts", key="t4")
+    st.image(apply_cataracts(img) if cataracts_on else img, use_container_width=True)
+    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Cataracts']}</div></div>", unsafe_allow_html=True)
+
+with col5:
+    st.markdown("<h3>Diabetic Retinopathy</h3>", unsafe_allow_html=True)
+    retino_on = st.toggle("Simulate Diabetic Retinopathy", key="t5")
+    st.image(apply_retinopathy(img) if retino_on else img, use_container_width=True)
+    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Diabetic Retinopathy']}</div></div>", unsafe_allow_html=True)
+
+with col6:
+    st.markdown("<h3>Low Vision</h3>", unsafe_allow_html=True)
+    low_on = st.toggle("Simulate Low Vision", key="t6")
+    st.image(apply_low_vision(img) if low_on else img, use_container_width=True)
+    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Low Vision']}</div></div>", unsafe_allow_html=True)
