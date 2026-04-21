@@ -141,10 +141,9 @@ logo_light_base64 = get_svg_base64("Perkins_Trademark_Color.svg")
 logo_dark_base64 = get_svg_base64("Perkins_Trademark_White.svg")
 
 if logo_light_base64 and logo_dark_base64:
-    logo_html = f"""
-    <img src='data:image/svg+xml;base64,{logo_light_base64}' alt='Perkins Logo' class='logo-light'>
-    <img src='data:image/svg+xml;base64,{logo_dark_base64}' alt='Perkins Logo' class='logo-dark'>
-    """
+    # Removed indentation here to prevent Markdown code-blocking!
+    logo_html = f"""<img src='data:image/svg+xml;base64,{logo_light_base64}' alt='Perkins Logo' class='logo-light'>
+<img src='data:image/svg+xml;base64,{logo_dark_base64}' alt='Perkins Logo' class='logo-dark'>"""
 elif logo_light_base64:
     logo_html = f"<img src='data:image/svg+xml;base64,{logo_light_base64}' alt='Perkins Logo' style='display: block; margin: 0 auto 15px auto; max-width: 280px;'>"
 elif logo_dark_base64:
@@ -152,16 +151,17 @@ elif logo_dark_base64:
 else:
     logo_html = "<p style='color:red; font-weight:bold; text-align:center;'>⚠️ Could not find logo files. Please ensure they are uploaded.</p>"
 
+# Removed indentation here as well!
 st.markdown(f"""
 <div style='text-align: center; padding-top: 30px; padding-bottom: 10px;'>
-    <a href='https://www.perkins.org/' target='_blank'>
-        {logo_html}
-    </a>
-    <h1 style='font-size: 2.8em; margin-bottom: 10px;'>What Blindness Really Looks Like</h1>
-    <p style='font-size: 1.15em; max-width: 800px; margin: 0 auto; line-height: 1.6;'>
-        An interactive vision simulator inspired by the advocacy and resources of <a href='https://www.perkins.org/what-blindness-really-looks-like/' target='_blank' style='color: #00A3E0; font-weight: bold; text-decoration: none;'>Perkins School for the Blind</a>.<br>
-        <span style='font-size: 0.85em; opacity: 0.8;'>📸 Photo Credit: <a href='https://www.pexels.com/@ganajp/' target='_blank' style='color: #00A3E0; text-decoration: none;'>Petr Ganaj</a></span>
-    </p>
+<a href='https://www.perkins.org/' target='_blank'>
+{logo_html}
+</a>
+<h1 style='font-size: 2.8em; margin-bottom: 10px;'>What Blindness Really Looks Like</h1>
+<p style='font-size: 1.15em; max-width: 800px; margin: 0 auto; line-height: 1.6;'>
+An interactive vision simulator inspired by the advocacy and resources of <a href='https://www.perkins.org/what-blindness-really-looks-like/' target='_blank' style='color: #00A3E0; font-weight: bold; text-decoration: none;'>Perkins School for the Blind</a>.<br>
+<span style='font-size: 0.85em; opacity: 0.8;'>📸 Photo Credit: <a href='https://www.pexels.com/@ganajp/' target='_blank' style='color: #00A3E0; text-decoration: none;'>Petr Ganaj</a></span>
+</p>
 </div>
 """, unsafe_allow_html=True)
 
