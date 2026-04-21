@@ -11,21 +11,22 @@ st.set_page_config(page_title="What Blindness Really Looks Like", layout="wide")
 # ==========================================
 st.markdown("""
 <style>
-/* Responsive main container */
+/* Responsive main container - Drastically reduced padding for tighter whitespace */
 .block-container {
     max-width: 1400px !important;
     margin: 0 auto !important;
-    padding-top: 2rem !important;
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
 }
 
 /* Sticky Navigation Bar - Optimized for Mobile */
 .nav-bar {
     display: flex;
     justify-content: center;
-    flex-wrap: wrap; /* Allows links to stack cleanly on narrow mobile screens */
+    flex-wrap: wrap; 
     gap: 20px;
     background-color: #ffffff;
-    padding: 15px;
+    padding: 10px;
     border-bottom: 2px solid #f0f2f6;
     position: -webkit-sticky; /* Safari */
     position: sticky;
@@ -42,9 +43,10 @@ st.markdown("""
     color: #ff4b4b;
 }
 
-/* Global Centering for Headings */
+/* Global Centering for Headings & Tighter Bottom Spacing */
 h1, h2, h3, h4 {
     text-align: center !important;
+    margin-bottom: 0.2rem !important; 
 }
 
 /* Perfect Centering for the Image Comparison Container */
@@ -56,17 +58,18 @@ h1, h2, h3, h4 {
     overflow: visible !important;
 }
 
-/* Hack to hide the JuxtaposeJS logo at the bottom of the iframe */
-iframe {
-    clip-path: inset(0px 0px 27px 0px);
-    margin-bottom: -27px; /* Pulls the layout back up so there isn't an empty gap */
-}
-
 /* Clean up vertical spacing around the component */
 .stImageComparison {
-    margin-top: 10px !important;
-    margin-bottom: 10px !important;
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+    padding-bottom: 0px !important;
     width: 100% !important;
+}
+
+/* Strip margin off the iframe directly to fix short images leaving gaps */
+iframe {
+    margin-bottom: 0px !important;
+    display: block;
 }
 
 /* Text Alignment Wrappers for Descriptions */
@@ -74,13 +77,14 @@ iframe {
     display: flex;
     justify-content: center;
     width: 100%;
-    margin-bottom: 2rem;
+    margin-top: 0px; 
+    margin-bottom: 1rem;
 }
 
 .detailed-desc {
     font-size: 1.05em;
     line-height: 1.5;
-    margin-top: 10px;
+    margin-top: 0px;
     text-align: left; 
     width: 100%;
 }
@@ -115,7 +119,8 @@ _, uploader_center, _ = st.columns([1, 2, 1])
 
 with uploader_center:
     st.markdown("<p style='text-align: center;'>Upload a photo to see the simulations applied to your own environment.</p>", unsafe_allow_html=True)
-    uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
+    # Added more image formats to the accepted types list
+    uploaded_file = st.file_uploader("Upload an image (Max 50MB)", type=["jpg", "jpeg", "png", "webp", "bmp", "tiff", "gif"], label_visibility="collapsed")
 
 st.divider()
 
@@ -180,9 +185,14 @@ def apply_low_vision(img):
 st.header("Medical Eye Conditions")
 st.markdown("<p style='text-align: center;'>Drag the sliders to see the difference between normal and impaired vision.</p><br>", unsafe_allow_html=True)
 
-# Image Loading and Mobile Optimization
+# Image Loading, File Size Limitation, and Mobile Optimization
 if uploaded_file:
-    img = Image.open(uploaded_file).convert("RGB")
+    # 50MB limit check (50 * 1024 * 1024 bytes)
+    if uploaded_file.size > 52428800:
+        st.error("⚠️ The uploaded file is larger than the 50MB limit. Please upload a smaller image.")
+        st.stop()
+    else:
+        img = Image.open(uploaded_file).convert("RGB")
 else:
     try:
         img = Image.open("sample_image.jpg").convert("RGB")
@@ -191,7 +201,6 @@ else:
         st.stop()
 
 # Crucial for mobile smoothness: Compress excessively large photos
-# A 12MP phone camera photo will lag heavily without this.
 max_dimension = (1200, 1200)
 img.thumbnail(max_dimension, Image.Resampling.LANCZOS)
 
@@ -224,7 +233,7 @@ with col3:
     image_comparison(img, gray_img, label1="Normal", label2="Achromatopsia", make_responsive=True)
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Achromatopsia']}</div></div>", unsafe_allow_html=True)
 
-# Adding visual space between rows (Streamlit columns wrap automatically on mobile)
+# Adding visual space between rows
 st.markdown("<br>", unsafe_allow_html=True)
 
 # --- ROW 2 ---
