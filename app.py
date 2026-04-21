@@ -11,79 +11,81 @@ st.set_page_config(page_title="What Blindness Really Looks Like", layout="wide")
 # ==========================================
 # ADVANCED CSS: MOBILE OPTIMIZATION & BRANDING
 # ==========================================
-st.markdown("""
+# We are using the new brand color: #1d4f91
+# and the light blue accent: #00A3E0 for contrast.
+st.markdown(f"""
 <style>
 /* Smooth scrolling and offset for the sticky nav bar */
-html {
+html {{
     scroll-behavior: smooth;
     scroll-padding-top: 80px; 
-}
+}}
 
-/* Responsive main container with added top/bottom breathing room */
-.block-container {
+/* Responsive main container with increased top breathing room */
+.block-container {{
     max-width: 1400px !important;
     margin: 0 auto !important;
-    padding-top: 1.5rem !important;
+    padding-top: 5rem !important; /* Increased from 3rem */
     padding-bottom: 5rem !important;
-}
+}}
 
-/* MOBILE OPTIMIZATION: Restored some side padding */
-@media (max-width: 768px) {
-    .block-container {
+/* MOBILE OPTIMIZATION: Restored some side padding and increased top margin */
+@media (max-width: 768px) {{
+    .block-container {{
         padding-left: 1.2rem !important;
         padding-right: 1.2rem !important;
-        padding-top: 1rem !important;
-    }
-}
+        padding-top: 3rem !important; /* Increased from 2rem */
+    }}
+}}
 
-/* Sticky Navigation Bar - PERKINS BRANDING */
-.nav-bar {
+/* Sticky Navigation Bar - PERKINS BRANDING (NEW COLOR) */
+.nav-bar {{
     display: flex;
     justify-content: center;
     flex-wrap: wrap; 
     gap: 20px;
-    background-color: #003A70; /* Perkins Deep Navy Blue */
+    background-color: #1d4f91; /* Perkins New Brand Navy Blue */
     padding: 15px 10px;
-    border-bottom: 4px solid #00A3E0; /* Perkins Vibrant Light Blue */
+    border-bottom: 4px solid #00A3E0; /* Perkins Light Blue Accent */
     position: -webkit-sticky; 
     position: sticky;
     top: 0;
     z-index: 1000;
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-}
-.nav-bar a {
+}}
+.nav-bar a {{
     text-decoration: none;
     color: #ffffff;
     font-weight: bold;
     font-size: 1.1em;
     letter-spacing: 0.5px;
     transition: color 0.2s ease-in-out;
-}
-.nav-bar a:hover {
+}}
+.nav-bar a:hover {{
     color: #00A3E0;
-}
+}}
 
 /* Brand Colors for Typography */
-h1, h2, h3, h4 {
+h1, h2, h3, h4 {{
     text-align: center !important;
     margin-bottom: 0.2rem !important; 
-    color: #003A70 !important; /* Apply Perkins Navy to headers */
-}
+    color: #1d4f91 !important; /* Perkins New Brand Navy for headers */
+}}
 
-.desc-wrapper {
+.desc-wrapper {{
     display: flex;
     justify-content: center;
     width: 100%;
     margin-top: 5px; 
     margin-bottom: 2rem;
-}
+}}
 
-.detailed-desc {
+.detailed-desc {{
     font-size: 1.05em;
     line-height: 1.5;
     text-align: left; 
     width: 100%;
-}
+}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -95,11 +97,11 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Perkins Branded Header
+# Perkins Branded Header - With local SVG logo
 st.markdown("""
 <div style='text-align: center; padding-top: 30px; padding-bottom: 10px;'>
     <a href='https://www.perkins.org/' target='_blank'>
-        <img src='https://img.logokit.com/perkins.org' alt='Perkins School for the Blind Logo' style='max-width: 280px; margin-bottom: 15px;'>
+        <img src='perkins.svg' alt='Perkins Logo' style='max-width: 280px; margin-bottom: 15px;'>
     </a>
     <h1 style='font-size: 2.8em; margin-bottom: 10px;'>What Blindness Really Looks Like</h1>
     <p style='font-size: 1.15em; color: #444; max-width: 800px; margin: 0 auto; line-height: 1.6;'>
@@ -119,7 +121,7 @@ _, uploader_center, _ = st.columns([1, 2, 1])
 
 with uploader_center:
     st.markdown("<p style='text-align: center;'>Upload a photo to see the simulations applied to your own environment.</p>", unsafe_allow_html=True)
-    # File uploader text updated to 10MB
+    # Clearer uploader wording (10MB limit is correct in code logic)
     uploaded_file = st.file_uploader("Upload an image (Max 10MB)", type=["jpg", "jpeg", "png", "webp", "bmp", "tiff", "gif"], label_visibility="collapsed")
 
 st.divider()
@@ -182,11 +184,13 @@ def apply_low_vision(img):
 # CUSTOM OVERLAY SLIDER
 # ==========================================
 def img_to_base64(img):
+    """Converts a PIL Image to a base64 string for HTML embedding."""
     buffered = BytesIO()
     img.save(buffered, format="JPEG", quality=80) 
     return base64.b64encode(buffered.getvalue()).decode()
 
 def custom_overlay_slider(img_normal, img_simulated, condition_name, height):
+    """Generates a custom HTML/CSS slider overlay mapped to exact pixel height."""
     img_normal_b64 = img_to_base64(img_normal)
     img_simulated_b64 = img_to_base64(img_simulated)
     
@@ -254,8 +258,8 @@ def custom_overlay_slider(img_normal, img_simulated, condition_name, height):
             border-top: 6px solid transparent;
             border-bottom: 6px solid transparent;
         }}
-        .handle-circle::before {{ border-right: 8px solid #003A70; margin-right: 3px; }}
-        .handle-circle::after {{ border-left: 8px solid #003A70; margin-left: 3px; }}
+        .handle-circle::before {{ border-right: 8px solid #1d4f91; margin-right: 3px; }} /* Perkins New Brand Navy */
+        .handle-circle::after {{ border-left: 8px solid #1d4f91; margin-left: 3px; }} /* Perkins New Brand Navy */
         
         .invisible-slider {{
             position: absolute;
@@ -280,7 +284,7 @@ def custom_overlay_slider(img_normal, img_simulated, condition_name, height):
             pointer-events: none;
         }}
         .label-tag {{
-            background: rgba(0, 58, 112, 0.85); /* Perkins Navy with transparency */
+            background: rgba(29, 79, 145, 0.85); /* Perkins New Brand Navy with transparency */
             color: white;
             padding: 4px 10px;
             border-radius: 4px;
