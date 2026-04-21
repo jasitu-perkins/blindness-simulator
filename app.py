@@ -12,33 +12,34 @@ st.set_page_config(page_title="What Blindness Really Looks Like", layout="wide")
 # ==========================================
 # ADVANCED CSS: MOBILE OPTIMIZATION & BRANDING
 # ==========================================
-st.markdown(f"""
+# (Changed to a standard string to avoid any curly bracket syntax errors)
+st.markdown("""
 <style>
 /* Smooth scrolling and offset for the sticky nav bar */
-html {{
+html {
     scroll-behavior: smooth;
     scroll-padding-top: 80px; 
-}}
+}
 
 /* Responsive main container with increased top breathing room */
-.block-container {{
+.block-container {
     max-width: 1400px !important;
     margin: 0 auto !important;
     padding-top: 5rem !important; 
     padding-bottom: 5rem !important;
-}}
+}
 
-/* MOBILE OPTIMIZATION: Restored some side padding and increased top margin */
-@media (max-width: 768px) {{
-    .block-container {{
+/* MOBILE OPTIMIZATION */
+@media (max-width: 768px) {
+    .block-container {
         padding-left: 1.2rem !important;
         padding-right: 1.2rem !important;
         padding-top: 3rem !important; 
-    }}
-}}
+    }
+}
 
 /* Sticky Navigation Bar - PERKINS BRANDING */
-.nav-bar {{
+.nav-bar {
     display: flex;
     justify-content: center;
     flex-wrap: wrap; 
@@ -51,69 +52,69 @@ html {{
     top: 0;
     z-index: 1000;
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-}}
-.nav-bar a {{
+}
+.nav-bar a {
     text-decoration: none;
     color: #ffffff;
     font-weight: bold;
     font-size: 1.1em;
     letter-spacing: 0.5px;
     transition: color 0.2s ease-in-out;
-}}
-.nav-bar a:hover {{
+}
+.nav-bar a:hover {
     color: #00A3E0;
-}}
+}
 
 /* LIGHT MODE: Default Headers & Logo */
-h1, h2, h3, h4 {{
+h1, h2, h3, h4 {
     text-align: center !important;
     margin-bottom: 0.2rem !important; 
-    color: #1d4f91 !important; /* Perkins Brand Navy */
-}}
+    color: #1d4f91 !important; 
+}
 
-.logo-light {{
+.logo-light {
     display: block;
     margin: 0 auto 15px auto;
     max-width: 280px;
-}}
-.logo-dark {{
-    display: none; /* Hidden in light mode */
+}
+.logo-dark {
+    display: none; 
     margin: 0 auto 15px auto;
     max-width: 280px;
-}}
+}
 
 /* DARK MODE OVERRIDES */
-@media (prefers-color-scheme: dark) {{
-    h1, h2, h3, h4 {{
-        color: #00A3E0 !important; /* Perkins Light Blue pops on dark backgrounds */
-    }}
-    .logo-light {{
-        display: none !important; /* Hide color logo in dark mode */
-    }}
-    .logo-dark {{
-        display: block !important; /* Show white logo in dark mode */
-    }}
-}}
+@media (prefers-color-scheme: dark) {
+    h1, h2, h3, h4 {
+        color: #00A3E0 !important; 
+    }
+    .logo-light {
+        display: none !important; 
+    }
+    .logo-dark {
+        display: block !important; 
+    }
+}
 
 /* Hide Streamlit's default file uploader size text */
-.stFileUploader small {{
+.stFileUploader small {
     display: none !important;
-}}
+}
 
-.desc-wrapper {{
+.desc-wrapper {
     display: flex;
     justify-content: center;
     width: 100%;
     margin-top: 5px; 
     margin-bottom: 2rem;
-}}
+}
 
-.detailed-desc {{
+.detailed-desc {
     font-size: 1.05em;
     line-height: 1.5;
     text-align: left; 
     width: 100%;
-}}
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -129,7 +130,6 @@ st.markdown("""
 # HEADER WITH SMART LOGO SWAPPING
 # ==========================================
 def get_svg_base64(filepath):
-    """Reads a local file and converts it to a base64 string."""
     try:
         with open(filepath, "rb") as f:
             data = f.read()
@@ -137,27 +137,21 @@ def get_svg_base64(filepath):
     except Exception as e:
         return None
 
-# Get both logos
 logo_light_base64 = get_svg_base64("Perkins_Trademark_Color.svg")
 logo_dark_base64 = get_svg_base64("Perkins_Trademark_White.svg")
 
-# Build the HTML depending on which files are found
 if logo_light_base64 and logo_dark_base64:
-    # Both found! The CSS will decide which one to show.
     logo_html = f"""
     <img src='data:image/svg+xml;base64,{logo_light_base64}' alt='Perkins Logo' class='logo-light'>
     <img src='data:image/svg+xml;base64,{logo_dark_base64}' alt='Perkins Logo' class='logo-dark'>
     """
 elif logo_light_base64:
-    # Only color found
-    logo_html = f"<img src='data:image/svg+xml;base64,{logo_light_base64}' alt='Perkins Logo' class='logo-light' style='display: block;'>"
+    logo_html = f"<img src='data:image/svg+xml;base64,{logo_light_base64}' alt='Perkins Logo' style='display: block; margin: 0 auto 15px auto; max-width: 280px;'>"
 elif logo_dark_base64:
-    # Only white found
-    logo_html = f"<img src='data:image/svg+xml;base64,{logo_dark_base64}' alt='Perkins Logo' class='logo-dark' style='display: block;'>"
+    logo_html = f"<img src='data:image/svg+xml;base64,{logo_dark_base64}' alt='Perkins Logo' style='display: block; margin: 0 auto 15px auto; max-width: 280px;'>"
 else:
     logo_html = "<p style='color:red; font-weight:bold; text-align:center;'>⚠️ Could not find logo files. Please ensure they are uploaded.</p>"
 
-# Render the header
 st.markdown(f"""
 <div style='text-align: center; padding-top: 30px; padding-bottom: 10px;'>
     <a href='https://www.perkins.org/' target='_blank'>
@@ -186,7 +180,7 @@ with uploader_center:
 st.divider()
 
 # ==========================================
-# EFFECT FUNCTIONS (Cached for speed)
+# EFFECT FUNCTIONS
 # ==========================================
 @st.cache_data
 def apply_glaucoma(img):
@@ -396,10 +390,14 @@ else:
     try:
         img = Image.open("sample_image.jpg").convert("RGB")
     except:
-        st.warning("Please upload an image or ensure 'sample_image.jpg' is available.")
-        st.stop()
+        # FAILSAFE: If no image is found, create a blank colorful canvas so the app doesn't crash
+        img = Image.new('RGB', (800, 600), color='#1d4f91')
 
-img.thumbnail((600, 600), Image.Resampling.LANCZOS)
+# Use a safe resize method that works across all versions of Python/Pillow
+try:
+    img.thumbnail((600, 600), Image.Resampling.LANCZOS)
+except AttributeError:
+    img.thumbnail((600, 600), Image.ANTIALIAS)
 
 aspect_ratio = img.height / img.width
 dynamic_container_height = int(350 * aspect_ratio)
