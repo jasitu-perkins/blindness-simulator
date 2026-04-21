@@ -74,14 +74,14 @@ h1, h2, h3, h4 {
 .logo-light {
     display: block;
     margin: 0 auto 15px auto;
-    max-width: 15.6em; /* At least 250px on standard screens */
+    max-width: 15.625em; /* Exactly 250px on standard screens */
     width: 100%;
     height: auto;
 }
 .logo-dark {
     display: none; 
     margin: 0 auto 15px auto;
-    max-width: 15.6em; /* At least 250px on standard screens */
+    max-width: 15.625em; /* Exactly 250px on standard screens */
     width: 100%;
     height: auto;
 }
@@ -147,9 +147,9 @@ if logo_light_base64 and logo_dark_base64:
     logo_html = f"""<img src='data:image/svg+xml;base64,{logo_light_base64}' alt='Perkins Logo' class='logo-light'>
 <img src='data:image/svg+xml;base64,{logo_dark_base64}' alt='Perkins Logo' class='logo-dark'>"""
 elif logo_light_base64:
-    logo_html = f"<img src='data:image/svg+xml;base64,{logo_light_base64}' alt='Perkins Logo' style='display: block; margin: 0 auto 15px auto; max-width: 15.6em; width: 100%; height: auto;'>"
+    logo_html = f"<img src='data:image/svg+xml;base64,{logo_light_base64}' alt='Perkins Logo' style='display: block; margin: 0 auto 15px auto; max-width: 15.625em; width: 100%; height: auto;'>"
 elif logo_dark_base64:
-    logo_html = f"<img src='data:image/svg+xml;base64,{logo_dark_base64}' alt='Perkins Logo' style='display: block; margin: 0 auto 15px auto; max-width: 15.6em; width: 100%; height: auto;'>"
+    logo_html = f"<img src='data:image/svg+xml;base64,{logo_dark_base64}' alt='Perkins Logo' style='display: block; margin: 0 auto 15px auto; max-width: 15.625em; width: 100%; height: auto;'>"
 else:
     logo_html = "<p style='color:red; font-weight:bold; text-align:center;'>⚠️ Could not find logo files. Please ensure they are uploaded.</p>"
 
@@ -175,7 +175,6 @@ st.header("📸 Try It With Your Own Photo!")
 _, uploader_center, _ = st.columns([1, 2, 1])
 
 with uploader_center:
-    # Removed the bold (Max 10MB) text here
     st.markdown("<p style='text-align: center;'>Upload a photo to see the simulations applied to your own environment.</p>", unsafe_allow_html=True)
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png", "webp", "bmp", "tiff", "gif"], label_visibility="collapsed")
 
