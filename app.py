@@ -64,17 +64,34 @@ html {{
     color: #00A3E0;
 }}
 
-/* LIGHT MODE: Default Headers */
+/* LIGHT MODE: Default Headers & Logo */
 h1, h2, h3, h4 {{
     text-align: center !important;
     margin-bottom: 0.2rem !important; 
     color: #1d4f91 !important; /* Perkins Brand Navy */
 }}
 
+.logo-light {{
+    display: block;
+    margin: 0 auto 15px auto;
+    max-width: 280px;
+}}
+.logo-dark {{
+    display: none; /* Hidden in light mode */
+    margin: 0 auto 15px auto;
+    max-width: 280px;
+}}
+
 /* DARK MODE OVERRIDES */
 @media (prefers-color-scheme: dark) {{
     h1, h2, h3, h4 {{
         color: #00A3E0 !important; /* Perkins Light Blue pops on dark backgrounds */
+    }}
+    .logo-light {{
+        display: none !important; /* Hide color logo in dark mode */
+    }}
+    .logo-dark {{
+        display: block !important; /* Show white logo in dark mode */
     }}
 }}
 
@@ -100,7 +117,7 @@ h1, h2, h3, h4 {{
 </style>
 """, unsafe_allow_html=True)
 
-# Navigation Bar (Updated link text)
+# Navigation Bar 
 st.markdown("""
 <div class='nav-bar'>
     <a href='#try-it-with-your-own-photo'>Uploader</a>
@@ -109,7 +126,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# HEADER WITH LOCAL SVG LOGO
+# HEADER WITH SMART LOGO SWAPPING
 # ==========================================
 def get_svg_base64(filepath):
     """Reads a local file and converts it to a base64 string."""
@@ -120,17 +137,27 @@ def get_svg_base64(filepath):
     except Exception as e:
         return None
 
-# Convert the logo (ensure this filename exactly matches your uploaded file)
-logo_filename = "Perkins_Trademark_Color.svg"
-logo_base64 = get_svg_base64(logo_filename)
+# Get both logos
+logo_light_base64 = get_svg_base64("Perkins_Trademark_Color.svg")
+logo_dark_base64 = get_svg_base64("Perkins_Trademark_White.svg")
 
-if logo_base64:
-    # Added display: block and margin: 0 auto to force perfect centering
-    logo_html = f"<img src='data:image/svg+xml;base64,{logo_base64}' alt='Perkins Logo' style='display: block; margin: 0 auto 15px auto; max-width: 280px;'>"
+# Build the HTML depending on which files are found
+if logo_light_base64 and logo_dark_base64:
+    # Both found! The CSS will decide which one to show.
+    logo_html = f"""
+    <img src='data:image/svg+xml;base64,{logo_light_base64}' alt='Perkins Logo' class='logo-light'>
+    <img src='data:image/svg+xml;base64,{logo_dark_base64}' alt='Perkins Logo' class='logo-dark'>
+    """
+elif logo_light_base64:
+    # Only color found
+    logo_html = f"<img src='data:image/svg+xml;base64,{logo_light_base64}' alt='Perkins Logo' class='logo-light' style='display: block;'>"
+elif logo_dark_base64:
+    # Only white found
+    logo_html = f"<img src='data:image/svg+xml;base64,{logo_dark_base64}' alt='Perkins Logo' class='logo-dark' style='display: block;'>"
 else:
-    logo_html = f"<p style='color:red; font-weight:bold; text-align:center;'>⚠️ Could not find logo file: {logo_filename}. Please ensure it is in the same folder as this script.</p>"
+    logo_html = "<p style='color:red; font-weight:bold; text-align:center;'>⚠️ Could not find logo files. Please ensure they are uploaded.</p>"
 
-# Removed hardcoded colors in the paragraph so it adapts to dark mode automatically
+# Render the header
 st.markdown(f"""
 <div style='text-align: center; padding-top: 30px; padding-bottom: 10px;'>
     <a href='https://www.perkins.org/' target='_blank'>
@@ -153,7 +180,6 @@ st.header("📸 Try It With Your Own Photo!")
 _, uploader_center, _ = st.columns([1, 2, 1])
 
 with uploader_center:
-    # Custom instructions with explicit max size
     st.markdown("<p style='text-align: center;'>Upload a photo to see the simulations applied to your own environment. <br><b>(Max 10MB)</b></p>", unsafe_allow_html=True)
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png", "webp", "bmp", "tiff", "gif"], label_visibility="collapsed")
 
