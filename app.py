@@ -11,7 +11,7 @@ st.set_page_config(page_title="What Blindness Really Looks Like", layout="wide")
 # ==========================================
 st.markdown("""
 <style>
-/* Responsive main container - Drastically reduced padding for tighter whitespace */
+/* Responsive main container */
 .block-container {
     max-width: 1400px !important;
     margin: 0 auto !important;
@@ -28,7 +28,7 @@ st.markdown("""
     background-color: #ffffff;
     padding: 10px;
     border-bottom: 2px solid #f0f2f6;
-    position: -webkit-sticky; /* Safari */
+    position: -webkit-sticky; 
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -43,50 +43,24 @@ st.markdown("""
     color: #ff4b4b;
 }
 
-/* Global Centering for Headings & Tighter Bottom Spacing */
+/* Global Centering for Headings */
 h1, h2, h3, h4 {
     text-align: center !important;
     margin-bottom: 0.2rem !important; 
 }
 
-/* Perfect Centering for the Image Comparison Container */
-[data-testid="stVerticalBlock"] > div:has(div.stImageComparison) {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    margin-bottom: 0px !important;
-    overflow: visible !important;
-}
-
-/* Clean up vertical spacing around the component */
-.stImageComparison {
-    margin-top: 0px !important;
-    margin-bottom: 0px !important;
-    padding-bottom: 0px !important;
-    width: 100% !important;
-}
-
-/* Strip margin off the iframe directly to fix short images leaving gaps */
+/* Strip margin off the iframe for the modal */
 iframe {
     margin-bottom: 0px !important;
     display: block;
 }
 
-/* Text Alignment Wrappers for Descriptions */
-.desc-wrapper {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    margin-top: 0px; 
-    margin-bottom: 1rem;
-}
-
-.detailed-desc {
+/* Modal text styling */
+.modal-desc {
     font-size: 1.05em;
     line-height: 1.5;
-    margin-top: 0px;
+    margin-bottom: 1rem;
     text-align: left; 
-    width: 100%;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -119,7 +93,6 @@ _, uploader_center, _ = st.columns([1, 2, 1])
 
 with uploader_center:
     st.markdown("<p style='text-align: center;'>Upload a photo to see the simulations applied to your own environment.</p>", unsafe_allow_html=True)
-    # Added more image formats to the accepted types list
     uploaded_file = st.file_uploader("Upload an image (Max 50MB)", type=["jpg", "jpeg", "png", "webp", "bmp", "tiff", "gif"], label_visibility="collapsed")
 
 st.divider()
@@ -180,14 +153,25 @@ def apply_low_vision(img):
     return ImageEnhance.Brightness(img).enhance(0.6)
 
 # ==========================================
-# SIMULATION GRID
+# INTERACTIVE MODAL (POPUP) COMPONENT
+# ==========================================
+@st.dialog("Interactive Vision Simulation", width="large")
+def open_comparison_modal(original_img, processed_img, condition_name, description):
+    # This runs when the user clicks the "Compare" button
+    st.markdown(f"### {condition_name}")
+    st.markdown(f"<div class='modal-desc'>{description}</div>", unsafe_allow_html=True)
+    
+    # Render the slider perfectly at 100% modal width
+    image_comparison(original_img, processed_img, label1="Normal", label2=condition_name, make_responsive=True)
+
+
+# ==========================================
+# SIMULATION GRID (GALLERY)
 # ==========================================
 st.header("Medical Eye Conditions")
-st.markdown("<p style='text-align: center;'>Drag the sliders to see the difference between normal and impaired vision.</p><br>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'>Tap 'Compare' on any image to open the interactive full-screen slider.</p><br>", unsafe_allow_html=True)
 
-# Image Loading, File Size Limitation, and Mobile Optimization
 if uploaded_file:
-    # 50MB limit check (50 * 1024 * 1024 bytes)
     if uploaded_file.size > 52428800:
         st.error("⚠️ The uploaded file is larger than the 50MB limit. Please upload a smaller image.")
         st.stop()
@@ -200,11 +184,9 @@ else:
         st.warning("Please upload an image or ensure 'sample_image.jpg' is available.")
         st.stop()
 
-# Crucial for mobile smoothness: Compress excessively large photos
 max_dimension = (1200, 1200)
 img.thumbnail(max_dimension, Image.Resampling.LANCZOS)
 
-# Detailed Descriptions Dictionary
 descriptions = {
     "Glaucoma": "<b>The Condition:</b> Damages the optic nerve, often caused by abnormally high eye pressure. It typically develops slowly, with the first sign usually being the loss of peripheral vision.<br><br><b>What's in the Image:</b> Creates a 'tunnel vision' effect. The center remains clear, but the outer edges are heavily darkened.",
     "Macular Degeneration": "<b>The Condition:</b> Deterioration of the central portion of the retina. Because it affects the center of the visual field, reading and recognizing faces becomes very difficult.<br><br><b>What's in the Image:</b> A dark, solid blurry 'cloud' is applied directly over the center of the image, while peripheral edges remain clear.",
@@ -214,42 +196,55 @@ descriptions = {
     "Low Vision": "<b>The Condition:</b> A broad term for significant visual impairment that cannot be fully corrected, resulting in a severe loss of visual sharpness.<br><br><b>What's in the Image:</b> A moderate blur is applied across the entire image and brightness is reduced, simulating a hazy, unfocused world."
 }
 
+# Pre-process the images
+img_glaucoma = apply_glaucoma(img)
+img_macular = apply_macular(img)
+img_achromatopsia = img.convert('L').convert('RGB')
+img_cataracts = apply_cataracts(img)
+img_retino = apply_retinopathy(img)
+img_low_vision = apply_low_vision(img)
+
+
 # --- ROW 1 ---
-col1, col2, col3 = st.columns(3, gap="large")
+col1, col2, col3 = st.columns(3, gap="medium")
 
 with col1:
     st.markdown("<h3>Glaucoma</h3>", unsafe_allow_html=True)
-    image_comparison(img, apply_glaucoma(img), label1="Normal", label2="Glaucoma", make_responsive=True)
-    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Glaucoma']}</div></div>", unsafe_allow_html=True)
+    st.image(img_glaucoma, use_container_width=True)
+    if st.button("🔍 Compare", key="btn_glaucoma", use_container_width=True):
+        open_comparison_modal(img, img_glaucoma, "Glaucoma", descriptions['Glaucoma'])
 
 with col2:
     st.markdown("<h3>Macular Degeneration</h3>", unsafe_allow_html=True)
-    image_comparison(img, apply_macular(img), label1="Normal", label2="Macular Degeneration", make_responsive=True)
-    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Macular Degeneration']}</div></div>", unsafe_allow_html=True)
+    st.image(img_macular, use_container_width=True)
+    if st.button("🔍 Compare", key="btn_macular", use_container_width=True):
+        open_comparison_modal(img, img_macular, "Macular Degeneration", descriptions['Macular Degeneration'])
 
 with col3:
     st.markdown("<h3>Achromatopsia</h3>", unsafe_allow_html=True)
-    gray_img = img.convert('L').convert('RGB')
-    image_comparison(img, gray_img, label1="Normal", label2="Achromatopsia", make_responsive=True)
-    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Achromatopsia']}</div></div>", unsafe_allow_html=True)
+    st.image(img_achromatopsia, use_container_width=True)
+    if st.button("🔍 Compare", key="btn_achrom", use_container_width=True):
+        open_comparison_modal(img, img_achromatopsia, "Achromatopsia", descriptions['Achromatopsia'])
 
-# Adding visual space between rows
 st.markdown("<br>", unsafe_allow_html=True)
 
 # --- ROW 2 ---
-col4, col5, col6 = st.columns(3, gap="large")
+col4, col5, col6 = st.columns(3, gap="medium")
 
 with col4:
     st.markdown("<h3>Cataracts</h3>", unsafe_allow_html=True)
-    image_comparison(img, apply_cataracts(img), label1="Normal", label2="Cataracts", make_responsive=True)
-    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Cataracts']}</div></div>", unsafe_allow_html=True)
+    st.image(img_cataracts, use_container_width=True)
+    if st.button("🔍 Compare", key="btn_cataracts", use_container_width=True):
+        open_comparison_modal(img, img_cataracts, "Cataracts", descriptions['Cataracts'])
 
 with col5:
     st.markdown("<h3>Diabetic Retinopathy</h3>", unsafe_allow_html=True)
-    image_comparison(img, apply_retinopathy(img), label1="Normal", label2="Diabetic Retinopathy", make_responsive=True)
-    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Diabetic Retinopathy']}</div></div>", unsafe_allow_html=True)
+    st.image(img_retino, use_container_width=True)
+    if st.button("🔍 Compare", key="btn_retino", use_container_width=True):
+        open_comparison_modal(img, img_retino, "Diabetic Retinopathy", descriptions['Diabetic Retinopathy'])
 
 with col6:
     st.markdown("<h3>Low Vision</h3>", unsafe_allow_html=True)
-    image_comparison(img, apply_low_vision(img), label1="Normal", label2="Low Vision", make_responsive=True)
-    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Low Vision']}</div></div>", unsafe_allow_html=True)
+    st.image(img_low_vision, use_container_width=True)
+    if st.button("🔍 Compare", key="btn_low", use_container_width=True):
+        open_comparison_modal(img, img_low_vision, "Low Vision", descriptions['Low Vision'])
