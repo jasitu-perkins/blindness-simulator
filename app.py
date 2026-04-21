@@ -4,6 +4,7 @@ from PIL import Image, ImageFilter, ImageDraw, ImageEnhance
 import random
 import base64
 from io import BytesIO
+import os
 
 # 1. Page Configuration
 st.set_page_config(page_title="What Blindness Really Looks Like", layout="wide")
@@ -11,8 +12,6 @@ st.set_page_config(page_title="What Blindness Really Looks Like", layout="wide")
 # ==========================================
 # ADVANCED CSS: MOBILE OPTIMIZATION & BRANDING
 # ==========================================
-# We are using the new brand color: #1d4f91
-# and the light blue accent: #00A3E0 for contrast.
 st.markdown(f"""
 <style>
 /* Smooth scrolling and offset for the sticky nav bar */
@@ -25,7 +24,7 @@ html {{
 .block-container {{
     max-width: 1400px !important;
     margin: 0 auto !important;
-    padding-top: 5rem !important; /* Increased from 3rem */
+    padding-top: 5rem !important; 
     padding-bottom: 5rem !important;
 }}
 
@@ -34,7 +33,7 @@ html {{
     .block-container {{
         padding-left: 1.2rem !important;
         padding-right: 1.2rem !important;
-        padding-top: 3rem !important; /* Increased from 2rem */
+        padding-top: 3rem !important; 
     }}
 }}
 
@@ -44,9 +43,9 @@ html {{
     justify-content: center;
     flex-wrap: wrap; 
     gap: 20px;
-    background-color: #1d4f91; /* Perkins New Brand Navy Blue */
+    background-color: #1d4f91; 
     padding: 15px 10px;
-    border-bottom: 4px solid #00A3E0; /* Perkins Light Blue Accent */
+    border-bottom: 4px solid #00A3E0; 
     position: -webkit-sticky; 
     position: sticky;
     top: 0;
@@ -69,7 +68,7 @@ html {{
 h1, h2, h3, h4 {{
     text-align: center !important;
     margin-bottom: 0.2rem !important; 
-    color: #1d4f91 !important; /* Perkins New Brand Navy for headers */
+    color: #1d4f91 !important; 
 }}
 
 .desc-wrapper {{
@@ -97,11 +96,31 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Perkins Branded Header - With local SVG logo
-st.markdown("""
+# ==========================================
+# HEADER WITH LOCAL SVG LOGO
+# ==========================================
+def get_svg_base64(filepath):
+    """Reads a local file and converts it to a base64 string."""
+    try:
+        with open(filepath, "rb") as f:
+            data = f.read()
+            return base64.b64encode(data).decode()
+    except Exception as e:
+        return None
+
+# Convert the logo (ensure this filename exactly matches your uploaded file)
+logo_filename = "Perkins_Trademark_Color.svg"
+logo_base64 = get_svg_base64(logo_filename)
+
+if logo_base64:
+    logo_html = f"<img src='data:image/svg+xml;base64,{logo_base64}' alt='Perkins Logo' style='max-width: 280px; margin-bottom: 15px;'>"
+else:
+    logo_html = f"<p style='color:red; font-weight:bold;'>⚠️ Could not find logo file: {logo_filename}. Please ensure it is in the same folder as this script.</p>"
+
+st.markdown(f"""
 <div style='text-align: center; padding-top: 30px; padding-bottom: 10px;'>
     <a href='https://www.perkins.org/' target='_blank'>
-        <img src='perkins.svg' alt='Perkins Logo' style='max-width: 280px; margin-bottom: 15px;'>
+        {logo_html}
     </a>
     <h1 style='font-size: 2.8em; margin-bottom: 10px;'>What Blindness Really Looks Like</h1>
     <p style='font-size: 1.15em; color: #444; max-width: 800px; margin: 0 auto; line-height: 1.6;'>
@@ -121,7 +140,6 @@ _, uploader_center, _ = st.columns([1, 2, 1])
 
 with uploader_center:
     st.markdown("<p style='text-align: center;'>Upload a photo to see the simulations applied to your own environment.</p>", unsafe_allow_html=True)
-    # Clearer uploader wording (10MB limit is correct in code logic)
     uploaded_file = st.file_uploader("Upload an image (Max 10MB)", type=["jpg", "jpeg", "png", "webp", "bmp", "tiff", "gif"], label_visibility="collapsed")
 
 st.divider()
@@ -184,13 +202,11 @@ def apply_low_vision(img):
 # CUSTOM OVERLAY SLIDER
 # ==========================================
 def img_to_base64(img):
-    """Converts a PIL Image to a base64 string for HTML embedding."""
     buffered = BytesIO()
     img.save(buffered, format="JPEG", quality=80) 
     return base64.b64encode(buffered.getvalue()).decode()
 
 def custom_overlay_slider(img_normal, img_simulated, condition_name, height):
-    """Generates a custom HTML/CSS slider overlay mapped to exact pixel height."""
     img_normal_b64 = img_to_base64(img_normal)
     img_simulated_b64 = img_to_base64(img_simulated)
     
@@ -250,7 +266,7 @@ def custom_overlay_slider(img_normal, img_simulated, condition_name, height):
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid #00A3E0; /* Perkins Light Blue Accent */
+            border: 2px solid #00A3E0; 
         }}
         .handle-circle::before, .handle-circle::after {{
             content: '';
@@ -258,8 +274,8 @@ def custom_overlay_slider(img_normal, img_simulated, condition_name, height):
             border-top: 6px solid transparent;
             border-bottom: 6px solid transparent;
         }}
-        .handle-circle::before {{ border-right: 8px solid #1d4f91; margin-right: 3px; }} /* Perkins New Brand Navy */
-        .handle-circle::after {{ border-left: 8px solid #1d4f91; margin-left: 3px; }} /* Perkins New Brand Navy */
+        .handle-circle::before {{ border-right: 8px solid #1d4f91; margin-right: 3px; }} 
+        .handle-circle::after {{ border-left: 8px solid #1d4f91; margin-left: 3px; }} 
         
         .invisible-slider {{
             position: absolute;
@@ -284,14 +300,14 @@ def custom_overlay_slider(img_normal, img_simulated, condition_name, height):
             pointer-events: none;
         }}
         .label-tag {{
-            background: rgba(29, 79, 145, 0.85); /* Perkins New Brand Navy with transparency */
+            background: rgba(29, 79, 145, 0.85); 
             color: white;
             padding: 4px 10px;
             border-radius: 4px;
             font-size: 12px;
             font-weight: bold;
             letter-spacing: 0.5px;
-            border: 1px solid #00A3E0; /* Perkins Light Blue Accent */
+            border: 1px solid #00A3E0; 
         }}
     </style>
     </head>
@@ -330,7 +346,6 @@ st.header("Medical Eye Conditions")
 st.markdown("<p style='text-align: center;'>Drag the sliders below to see the difference.</p><br>", unsafe_allow_html=True)
 
 if uploaded_file:
-    # 10MB Limit implemented in bytes
     if uploaded_file.size > 10485760:
         st.error("⚠️ The uploaded file is larger than the 10MB limit. Please upload a smaller image.")
         st.stop()
