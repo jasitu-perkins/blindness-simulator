@@ -7,22 +7,23 @@ from streamlit_image_comparison import image_comparison
 st.set_page_config(page_title="What Blindness Really Looks Like", layout="wide")
 
 # ==========================================
-# ADVANCED CSS: ALIGNMENT & LAYOUT LOCK
+# ADVANCED CSS: MOBILE OPTIMIZATION & LAYOUT
 # ==========================================
 st.markdown("""
 <style>
-/* 1. Lock the maximum width of the app */
-/* This prevents elements from drifting apart on large screens, adding whitespace to the sides instead */
+/* Responsive main container */
 .block-container {
-    max-width: 1750px !important;
+    max-width: 1400px !important;
     margin: 0 auto !important;
+    padding-top: 2rem !important;
 }
 
-/* Sticky Navigation Bar */
+/* Sticky Navigation Bar - Optimized for Mobile */
 .nav-bar {
     display: flex;
     justify-content: center;
-    gap: 30px;
+    flex-wrap: wrap; /* Allows links to stack cleanly on narrow mobile screens */
+    gap: 20px;
     background-color: #ffffff;
     padding: 15px;
     border-bottom: 2px solid #f0f2f6;
@@ -55,17 +56,25 @@ h1, h2, h3, h4 {
     overflow: visible !important;
 }
 
+/* Hack to hide the JuxtaposeJS logo at the bottom of the iframe */
+iframe {
+    clip-path: inset(0px 0px 27px 0px);
+    margin-bottom: -27px; /* Pulls the layout back up so there isn't an empty gap */
+}
+
 /* Clean up vertical spacing around the component */
 .stImageComparison {
     margin-top: 10px !important;
     margin-bottom: 10px !important;
+    width: 100% !important;
 }
 
-/* Text Alignment Wrappers */
+/* Text Alignment Wrappers for Descriptions */
 .desc-wrapper {
     display: flex;
     justify-content: center;
     width: 100%;
+    margin-bottom: 2rem;
 }
 
 .detailed-desc {
@@ -74,7 +83,6 @@ h1, h2, h3, h4 {
     margin-top: 10px;
     text-align: left; 
     width: 100%;
-    max-width: 550px; /* Locked to exactly match the slider width */
 }
 </style>
 """, unsafe_allow_html=True)
@@ -82,7 +90,6 @@ h1, h2, h3, h4 {
 # Navigation Bar
 st.markdown("""
 <div class='nav-bar'>
-    <a href='#about-this-project-how-it-was-built'>About</a>
     <a href='#try-it-with-your-own-photo'>Uploader</a>
     <a href='#medical-eye-conditions'>Simulations</a>
 </div>
@@ -97,27 +104,6 @@ st.markdown("""
     📸 Photo Credit: <a href='https://www.pexels.com/@ganajp/' target='_blank'>Petr Ganaj</a>
 </p>
 """, unsafe_allow_html=True)
-
-st.divider()
-
-# ==========================================
-# ABOUT THE PROJECT SECTION
-# ==========================================
-st.header("ℹ️ About This Project & How It Was Built")
-
-st.markdown("**🖥️ What is on this page:**")
-st.write("This page features an interactive visual simulation tool. It allows users to upload their own images and use interactive sliders to compare normal vision side-by-side with six different medical eye conditions: Glaucoma, Macular Degeneration, Achromatopsia, Cataracts, Diabetic Retinopathy, and Low Vision.")
-
-st.markdown("**🎯 Purpose:**")
-st.write("This application was created to raise awareness and foster empathy. By providing a visual simulation of various medical eye conditions, it helps fully sighted individuals understand the daily visual challenges faced by those with visual impairments.")
-
-st.markdown("**🛠️ Technologies & Libraries Used:**")
-st.write("- **Streamlit:** Powers the web framework and responsive layout.")
-st.write("- **Pillow (PIL):** Handles background image processing and masking.")
-st.write("- **streamlit-image-comparison:** Renders the interactive comparison widget.")
-
-st.markdown("**🤖 Prompt Used to Generate This App:**")
-st.write('Create a responsive Streamlit web app in Python using PIL to simulate blindness and eye conditions. Add side-by-side image comparison sliders, ensure images, headers, and descriptions are perfectly centered together, leave appropriate whitespace, and use full spelled-out labels. Cataract spots should be solid/blurry and Diabetic Retinopathy spots should be solid. Ensure Glaucoma is a true pinhole effect.')
 
 st.divider()
 
@@ -194,6 +180,7 @@ def apply_low_vision(img):
 st.header("Medical Eye Conditions")
 st.markdown("<p style='text-align: center;'>Drag the sliders to see the difference between normal and impaired vision.</p><br>", unsafe_allow_html=True)
 
+# Image Loading and Mobile Optimization
 if uploaded_file:
     img = Image.open(uploaded_file).convert("RGB")
 else:
@@ -202,6 +189,11 @@ else:
     except:
         st.warning("Please upload an image or ensure 'sample_image.jpg' is available.")
         st.stop()
+
+# Crucial for mobile smoothness: Compress excessively large photos
+# A 12MP phone camera photo will lag heavily without this.
+max_dimension = (1200, 1200)
+img.thumbnail(max_dimension, Image.Resampling.LANCZOS)
 
 # Detailed Descriptions Dictionary
 descriptions = {
@@ -213,45 +205,42 @@ descriptions = {
     "Low Vision": "<b>The Condition:</b> A broad term for significant visual impairment that cannot be fully corrected, resulting in a severe loss of visual sharpness.<br><br><b>What's in the Image:</b> A moderate blur is applied across the entire image and brightness is reduced, simulating a hazy, unfocused world."
 }
 
-# The strict width: will not shrink or crop
-slider_width = 550
-
 # --- ROW 1 ---
 col1, col2, col3 = st.columns(3, gap="large")
 
 with col1:
     st.markdown("<h3>Glaucoma</h3>", unsafe_allow_html=True)
-    image_comparison(img, apply_glaucoma(img), label1="Normal", label2="Glaucoma", width=slider_width)
+    image_comparison(img, apply_glaucoma(img), label1="Normal", label2="Glaucoma", make_responsive=True)
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Glaucoma']}</div></div>", unsafe_allow_html=True)
 
 with col2:
     st.markdown("<h3>Macular Degeneration</h3>", unsafe_allow_html=True)
-    image_comparison(img, apply_macular(img), label1="Normal", label2="Macular Degeneration", width=slider_width)
+    image_comparison(img, apply_macular(img), label1="Normal", label2="Macular Degeneration", make_responsive=True)
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Macular Degeneration']}</div></div>", unsafe_allow_html=True)
 
 with col3:
     st.markdown("<h3>Achromatopsia</h3>", unsafe_allow_html=True)
     gray_img = img.convert('L').convert('RGB')
-    image_comparison(img, gray_img, label1="Normal", label2="Achromatopsia", width=slider_width)
+    image_comparison(img, gray_img, label1="Normal", label2="Achromatopsia", make_responsive=True)
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Achromatopsia']}</div></div>", unsafe_allow_html=True)
 
-# ADDING THE REQUESTED WHITE SPACE BETWEEN ROWS
-st.markdown("<br><br><br><br>", unsafe_allow_html=True)
+# Adding visual space between rows (Streamlit columns wrap automatically on mobile)
+st.markdown("<br>", unsafe_allow_html=True)
 
 # --- ROW 2 ---
 col4, col5, col6 = st.columns(3, gap="large")
 
 with col4:
     st.markdown("<h3>Cataracts</h3>", unsafe_allow_html=True)
-    image_comparison(img, apply_cataracts(img), label1="Normal", label2="Cataracts", width=slider_width)
+    image_comparison(img, apply_cataracts(img), label1="Normal", label2="Cataracts", make_responsive=True)
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Cataracts']}</div></div>", unsafe_allow_html=True)
 
 with col5:
     st.markdown("<h3>Diabetic Retinopathy</h3>", unsafe_allow_html=True)
-    image_comparison(img, apply_retinopathy(img), label1="Normal", label2="Diabetic Retinopathy", width=slider_width)
+    image_comparison(img, apply_retinopathy(img), label1="Normal", label2="Diabetic Retinopathy", make_responsive=True)
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Diabetic Retinopathy']}</div></div>", unsafe_allow_html=True)
 
 with col6:
     st.markdown("<h3>Low Vision</h3>", unsafe_allow_html=True)
-    image_comparison(img, apply_low_vision(img), label1="Normal", label2="Low Vision", width=slider_width)
+    image_comparison(img, apply_low_vision(img), label1="Normal", label2="Low Vision", make_responsive=True)
     st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Low Vision']}</div></div>", unsafe_allow_html=True)
