@@ -1,7 +1,6 @@
 import streamlit as st
 from PIL import Image, ImageFilter, ImageDraw, ImageEnhance
 import random
-from streamlit_image_comparison import image_comparison
 
 # 1. Page Configuration
 st.set_page_config(page_title="What Blindness Really Looks Like", layout="wide")
@@ -22,8 +21,8 @@ st.markdown("""
 /* MOBILE OPTIMIZATION: Maximize screen width on phones */
 @media (max-width: 768px) {
     .block-container {
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
     }
 }
 
@@ -57,44 +56,27 @@ h1, h2, h3, h4 {
     margin-bottom: 0.2rem !important; 
 }
 
-/* Perfect Centering for the Image Comparison Container */
-[data-testid="stVerticalBlock"] > div:has(div.stImageComparison) {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    margin-bottom: 0px !important;
-    overflow: visible !important;
-}
-
-/* Ensure sliders take full width and strip margins */
-.stImageComparison {
-    margin-top: 0px !important;
-    margin-bottom: 0px !important;
-    padding-bottom: 0px !important;
-    width: 100% !important;
-}
-
-iframe {
-    margin-bottom: 0px !important;
-    display: block;
-    width: 100% !important;
-}
-
 /* Text Alignment Wrappers for Descriptions */
 .desc-wrapper {
     display: flex;
     justify-content: center;
     width: 100%;
-    margin-top: 0px; 
+    margin-top: 10px; 
     margin-bottom: 2rem;
 }
 
 .detailed-desc {
     font-size: 1.05em;
     line-height: 1.5;
-    margin-top: 5px;
     text-align: left; 
     width: 100%;
+}
+
+/* Center the toggles */
+.stToggle {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 5px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -190,7 +172,7 @@ def apply_low_vision(img):
 # SIMULATION GRID
 # ==========================================
 st.header("Medical Eye Conditions")
-st.markdown("<p style='text-align: center;'>Drag the sliders to see the difference between normal and impaired vision.</p><br>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'>Tap the toggle switches to see the difference between normal and impaired vision.</p><br>", unsafe_allow_html=True)
 
 if uploaded_file:
     if uploaded_file.size > 52428800:
@@ -215,43 +197,4 @@ descriptions = {
     "Achromatopsia": "<b>The Condition:</b> A rare, inherited vision disorder where a person has a partial or total absence of color vision, relying entirely on rod cells.<br><br><b>What's in the Image:</b> The code strips away all color data and converts the image to grayscale, showing a purely black-and-white scene.",
     "Cataracts": "<b>The Condition:</b> A clouding of the normally clear lens of the eye, comparable to looking through a frosted window.<br><br><b>What's in the Image:</b> The background remains clear, while cloudy, soft, blurry white splotches obscure the view.",
     "Diabetic Retinopathy": "<b>The Condition:</b> A diabetes complication caused by damage to the blood vessels in the retina. It causes dark spots or 'floaters' to appear in vision.<br><br><b>What's in the Image:</b> The code generates random, solid dark splotches that obscure patches of the field of view.",
-    "Low Vision": "<b>The Condition:</b> A broad term for significant visual impairment that cannot be fully corrected, resulting in a severe loss of visual sharpness.<br><br><b>What's in the Image:</b> A moderate blur is applied across the entire image and brightness is reduced, simulating a hazy, unfocused world."
-}
-
-# --- ROW 1 ---
-col1, col2, col3 = st.columns(3, gap="large")
-
-with col1:
-    st.markdown("<h3>Glaucoma</h3>", unsafe_allow_html=True)
-    image_comparison(img, apply_glaucoma(img), label1="Normal", label2="Glaucoma", make_responsive=True)
-    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Glaucoma']}</div></div>", unsafe_allow_html=True)
-
-with col2:
-    st.markdown("<h3>Macular Degeneration</h3>", unsafe_allow_html=True)
-    image_comparison(img, apply_macular(img), label1="Normal", label2="Macular", make_responsive=True)
-    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Macular Degeneration']}</div></div>", unsafe_allow_html=True)
-
-with col3:
-    st.markdown("<h3>Achromatopsia</h3>", unsafe_allow_html=True)
-    gray_img = img.convert('L').convert('RGB')
-    image_comparison(img, gray_img, label1="Normal", label2="Achromatopsia", make_responsive=True)
-    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Achromatopsia']}</div></div>", unsafe_allow_html=True)
-
-
-# --- ROW 2 ---
-col4, col5, col6 = st.columns(3, gap="large")
-
-with col4:
-    st.markdown("<h3>Cataracts</h3>", unsafe_allow_html=True)
-    image_comparison(img, apply_cataracts(img), label1="Normal", label2="Cataracts", make_responsive=True)
-    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Cataracts']}</div></div>", unsafe_allow_html=True)
-
-with col5:
-    st.markdown("<h3>Diabetic Retinopathy</h3>", unsafe_allow_html=True)
-    image_comparison(img, apply_retinopathy(img), label1="Normal", label2="Retinopathy", make_responsive=True)
-    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Diabetic Retinopathy']}</div></div>", unsafe_allow_html=True)
-
-with col6:
-    st.markdown("<h3>Low Vision</h3>", unsafe_allow_html=True)
-    image_comparison(img, apply_low_vision(img), label1="Normal", label2="Low Vision", make_responsive=True)
-    st.markdown(f"<div class='desc-wrapper'><div class='detailed-desc'>{descriptions['Low Vision']}</div></div>", unsafe_allow_html=True)
+    "Low Vision": "<b>The Condition:</b> A broad term for significant visual impairment that cannot be fully corrected
