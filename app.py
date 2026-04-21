@@ -12,7 +12,6 @@ st.set_page_config(page_title="What Blindness Really Looks Like", layout="wide")
 # ==========================================
 # ADVANCED CSS: MOBILE OPTIMIZATION & BRANDING
 # ==========================================
-# (Changed to a standard string to avoid any curly bracket syntax errors)
 st.markdown("""
 <style>
 /* Smooth scrolling and offset for the sticky nav bar */
@@ -75,12 +74,16 @@ h1, h2, h3, h4 {
 .logo-light {
     display: block;
     margin: 0 auto 15px auto;
-    max-width: 280px;
+    max-width: 15.6em; /* At least 250px on standard screens */
+    width: 100%;
+    height: auto;
 }
 .logo-dark {
     display: none; 
     margin: 0 auto 15px auto;
-    max-width: 280px;
+    max-width: 15.6em; /* At least 250px on standard screens */
+    width: 100%;
+    height: auto;
 }
 
 /* DARK MODE OVERRIDES */
@@ -97,7 +100,7 @@ h1, h2, h3, h4 {
 }
 
 /* Hide Streamlit's default file uploader size text */
-.stFileUploader small {
+div[data-testid="stFileUploader"] small {
     display: none !important;
 }
 
@@ -141,17 +144,15 @@ logo_light_base64 = get_svg_base64("Perkins_Trademark_Color.svg")
 logo_dark_base64 = get_svg_base64("Perkins_Trademark_White.svg")
 
 if logo_light_base64 and logo_dark_base64:
-    # Removed indentation here to prevent Markdown code-blocking!
     logo_html = f"""<img src='data:image/svg+xml;base64,{logo_light_base64}' alt='Perkins Logo' class='logo-light'>
 <img src='data:image/svg+xml;base64,{logo_dark_base64}' alt='Perkins Logo' class='logo-dark'>"""
 elif logo_light_base64:
-    logo_html = f"<img src='data:image/svg+xml;base64,{logo_light_base64}' alt='Perkins Logo' style='display: block; margin: 0 auto 15px auto; max-width: 280px;'>"
+    logo_html = f"<img src='data:image/svg+xml;base64,{logo_light_base64}' alt='Perkins Logo' style='display: block; margin: 0 auto 15px auto; max-width: 15.6em; width: 100%; height: auto;'>"
 elif logo_dark_base64:
-    logo_html = f"<img src='data:image/svg+xml;base64,{logo_dark_base64}' alt='Perkins Logo' style='display: block; margin: 0 auto 15px auto; max-width: 280px;'>"
+    logo_html = f"<img src='data:image/svg+xml;base64,{logo_dark_base64}' alt='Perkins Logo' style='display: block; margin: 0 auto 15px auto; max-width: 15.6em; width: 100%; height: auto;'>"
 else:
     logo_html = "<p style='color:red; font-weight:bold; text-align:center;'>⚠️ Could not find logo files. Please ensure they are uploaded.</p>"
 
-# Removed indentation here as well!
 st.markdown(f"""
 <div style='text-align: center; padding-top: 30px; padding-bottom: 10px;'>
 <a href='https://www.perkins.org/' target='_blank'>
@@ -174,7 +175,8 @@ st.header("📸 Try It With Your Own Photo!")
 _, uploader_center, _ = st.columns([1, 2, 1])
 
 with uploader_center:
-    st.markdown("<p style='text-align: center;'>Upload a photo to see the simulations applied to your own environment. <br><b>(Max 10MB)</b></p>", unsafe_allow_html=True)
+    # Removed the bold (Max 10MB) text here
+    st.markdown("<p style='text-align: center;'>Upload a photo to see the simulations applied to your own environment.</p>", unsafe_allow_html=True)
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png", "webp", "bmp", "tiff", "gif"], label_visibility="collapsed")
 
 st.divider()
@@ -402,13 +404,14 @@ except AttributeError:
 aspect_ratio = img.height / img.width
 dynamic_container_height = int(350 * aspect_ratio)
 
+# Expanded condition descriptions
 descriptions = {
-    "Glaucoma": "<b>The Condition:</b> Damages the optic nerve, often caused by abnormally high eye pressure.<br><br><b>What's in the Image:</b> Creates a 'tunnel vision' effect. The center remains clear, but the outer edges are heavily darkened.",
-    "Macular Degeneration": "<b>The Condition:</b> Deterioration of the central portion of the retina.<br><br><b>What's in the Image:</b> A dark, solid blurry 'cloud' is applied directly over the center of the image.",
-    "Achromatopsia": "<b>The Condition:</b> A rare, inherited vision disorder where a person has a partial or total absence of color vision.<br><br><b>What's in the Image:</b> The code strips away all color data and converts the image to grayscale.",
-    "Cataracts": "<b>The Condition:</b> A clouding of the normally clear lens of the eye.<br><br><b>What's in the Image:</b> Cloudy, soft, blurry white splotches obscure the view.",
-    "Diabetic Retinopathy": "<b>The Condition:</b> A diabetes complication causing damage to blood vessels in the retina.<br><br><b>What's in the Image:</b> Random, solid dark splotches obscure patches of the field of view.",
-    "Low Vision": "<b>The Condition:</b> A broad term for significant visual impairment.<br><br><b>What's in the Image:</b> A moderate blur is applied and brightness is reduced."
+    "Glaucoma": "<b>The Condition:</b> Damage to the optic nerve, often linked to high eye pressure. It slowly steals peripheral (side) vision over time.<br><br><b>What's in the Image:</b> This creates a 'tunnel vision' effect, where the outer edges become dark and the world shrinks to a small central circle of sight.",
+    "Macular Degeneration": "<b>The Condition:</b> Deterioration of the central portion of the retina, making reading, driving, and recognizing faces highly difficult.<br><br><b>What's in the Image:</b> A dark, blurred or empty spot is placed right in the center of the vision, while peripheral vision remains intact.",
+    "Achromatopsia": "<b>The Condition:</b> A rare, inherited vision disorder where a person has a partial or total absence of color vision, sometimes accompanied by light sensitivity.<br><br><b>What's in the Image:</b> All color data is stripped away, converting the entire visual field to grayscale.",
+    "Cataracts": "<b>The Condition:</b> Clouding of the eye's natural lens, resulting in a loss of contrast, faded colors, and severe glare sensitivity.<br><br><b>What's in the Image:</b> The view feels like looking through a persistently foggy, dusty, or frosted window with overall blurriness.",
+    "Diabetic Retinopathy": "<b>The Condition:</b> Damage to the blood vessels in the retina due to diabetes, often causing poor night vision and fluctuating blurriness.<br><br><b>What's in the Image:</b> Patchy, 'Swiss-cheese' vision with floating dark spots (scotomas) obscuring random parts of the field.",
+    "Low Vision": "<b>The Condition:</b> A broad term for significant visual impairment that cannot be fully corrected with glasses, contacts, or surgery.<br><br><b>What's in the Image:</b> A moderate overall blur is applied and the brightness is reduced to simulate decreased visual acuity."
 }
 
 # --- ROW 1 ---
